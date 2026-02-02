@@ -1,1722 +1,2115 @@
 --[[
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║           AkaLib Enterprise Edition UI Library                ║
-    ║         FIXED: UIListLayout & Slider Thumb Issues            ║
-    ║                    Version 2.1.1 FIXED                        ║
-    ╚═══════════════════════════════════════════════════════════════╝
+███████╗██╗  ██╗███████╗██╗     ██╗██████╗ 
+██╔════╝██║ ██╔╝██╔════╝██║     ██║██╔══██╗
+█████╗  █████╔╝ █████╗  ██║     ██║██████╔╝
+██╔══╝  ██╔═██╗ ██╔══╝  ██║     ██║██╔══██╗
+███████╗██║  ██╗███████╗███████╗██║██████╔╝
+╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═════╝ 
+
+AKALIB - Enterprise-Grade UI Library
+Version: 1.0.0
+Designed for Developers
+Stable • Scalable • Professional
+
+Copyright (c) 2026 AKALIB
+Licensed for commercial and personal use
 ]]
 
-local AkaLibEnterprise = {}
-AkaLibEnterprise.Version = "2.1.1-Fixed"
-AkaLibEnterprise.Flags = {}
-AkaLibEnterprise.Windows = {}
-AkaLibEnterprise.Notifications = {}
+local AKALIB = {}
+AKALIB.__index = AKALIB
+AKALIB._VERSION = "1.0.0"
+AKALIB._DESCRIPTION = "Enterprise-Grade Roblox UI Library"
+AKALIB._LICENSE = "MIT"
 
--- Services
-local TweenService = game:GetService("TweenService")
+-- ═══════════════════════════════════════════════════════════
+-- CORE SERVICES
+-- ═══════════════════════════════════════════════════════════
+
+local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
 
--- Premium Theme System
-AkaLibEnterprise.Themes = {
-    RedBlack = {
-        Name = "Red Neon",
-        Background = Color3.fromRGB(8, 8, 12),
-        BackgroundSecondary = Color3.fromRGB(15, 12, 15),
-        Surface = Color3.fromRGB(20, 15, 18),
-        SurfaceHover = Color3.fromRGB(30, 20, 25),
-        
-        Accent = Color3.fromRGB(255, 50, 70),
-        AccentHover = Color3.fromRGB(255, 80, 100),
-        AccentDark = Color3.fromRGB(200, 30, 50),
-        
-        Success = Color3.fromRGB(34, 197, 94),
-        Warning = Color3.fromRGB(251, 191, 36),
-        Error = wide behind, 68, 68),
-        Info = Color3.fromRGB(99, 102, 241),
-        
-        TextPrimary = Color3.fromRGB(255, 250, 252),
-        TextSecondary = Color3.fromRGB(240, 200, 210),
-        TextTertiary = Color3.fromRGB(200, 150, 165),
-        TextDisabled = Color3.fromRGB(120, 100, 110),
-        
-        Border = Color3.fromRGB(255, 50, 70),
-        Divider = Color3.fromRGB(40, 30, 35),
-        Shadow = Color3.fromRGB(255, 50, 70),
-        
-        Glass = {
-            Transparency = 0.12,
-            Blur = 25,
-            Border = Color3.fromRGB(255, 80, 100)
-        }
-    },
-    
-    Dark = {
-        Name = "Dark Enterprise",
-        Background = Color3.fromRGB(12, 12, 16),
-        BackgroundSecondary = Color3.fromRGB(18, 18, 24),
-        Surface = Color3.fromRGB(24, 24, 32),
-        SurfaceHover = Color3.fromRGB(32, 32, 42),
-        
-        Accent = Color3.fromRGB(99, 102, 241),
-        AccentHover = Color3.fromRGB(129, 140, 248),
-        AccentDark = Color3.fromRGB(79, 70, 229),
-        
-        Success = Color3.fromRGB(34, 197, 94),
-        Warning = Color3.fromRGB(251, 191, 36),
-        Error = Color3.fromRGB(239, 68, 68),
-        Info = Color3.fromRGB(59, 130, 246),
-        
-        TextPrimary = Color3.fromRGB(248, 250, 252),
-        TextSecondary = Color3.fromRGB(203, 213, 225),
-        TextTertiary = Color3.fromRGB(148, 163, 184),
-        TextDisabled = Color3.fromRGB(100, 116, 139),
-        
-        Border = Color3.fromRGB(51, 65, 85),
-        Divider = Color3.fromRGB(30, 41, 59),
-        Shadow = Color3.fromRGB(0, 0, 0),
-        
-        Glass = {
-            Transparency = 0.15,
-            Blur = 20,
-            Border = Color3.fromRGB(71, 85, 105)
-        }
-    },
-    
-    Cyberpunk = {
-        Name = "Cyberpunk Neon",
-        Background = Color3.fromRGB(10, 0, 20),
-        BackgroundSecondary = Color3.fromRGB(20, 5, 30),
-        Surface = Color3.fromRGB(30, 10, 40),
-        SurfaceHover = Color3.fromRGB(40, 15, 50),
-        
-        Accent = Color3.fromRGB(236, 72, 153),
-        AccentHover = Color3.fromRGB(244, 114, 182),
-        AccentDark = Color3.fromRGB(219, 39, 119),
-        
-        Success = Color3.fromRGB(16, 185, 129),
-        Warning = Color3.fromRGB(245, 158, 11),
-        Error = Color3.fromRGB(220, 38, 38),
-        Info = Color3.fromRGB(14, 165, 233),
-        
-        TextPrimary = Color3.fromRGB(250, 250, 255),
-        TextSecondary = Color3.fromRGB(216, 180, 254),
-        TextTertiary = Color3.fromRGB(192, 132, 252),
-        TextDisabled = Color3.fromRGB(147, 51, 234),
-        
-        Border = Color3.fromRGB(147, 51, 234),
-        Divider = Color3.fromRGB(88, 28, 135),
-        Shadow = Color3.fromRGB(147, 51, 234),
-        
-        Glass = {
-            Transparency = 0.2,
-            Blur = 25,
-            Border = Color3.fromRGB(192, 132, 252)
-        }
-    }
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- ═══════════════════════════════════════════════════════════
+-- ENTERPRISE DESIGN TOKENS
+-- ═══════════════════════════════════════════════════════════
+
+local DesignTokens = {
+	-- Spacing System (8pt grid)
+	Spacing = {
+		None = 0,
+		XXS = 2,
+		XS = 4,
+		SM = 8,
+		MD = 12,
+		LG = 16,
+		XL = 24,
+		XXL = 32,
+		XXXL = 48
+	},
+	
+	-- Typography Scale
+	FontSize = {
+		XS = 10,
+		SM = 11,
+		Base = 13,
+		MD = 14,
+		LG = 16,
+		XL = 18,
+		XXL = 24,
+		Title = 20
+	},
+	
+	-- Border Radius
+	Radius = {
+		None = 0,
+		SM = 4,
+		MD = 6,
+		LG = 8,
+		XL = 12,
+		Round = 999
+	},
+	
+	-- Animation Duration (ms)
+	Duration = {
+		Instant = 0,
+		Fast = 150,
+		Base = 200,
+		Moderate = 300,
+		Slow = 500
+	},
+	
+	-- Z-Index Layers
+	ZIndex = {
+		Base = 1,
+		Dropdown = 100,
+		Modal = 200,
+		Toast = 300,
+		Tooltip = 400
+	}
 }
 
-AkaLibEnterprise.CurrentTheme = AkaLibEnterprise.Themes.RedBlack
+-- ═══════════════════════════════════════════════════════════
+-- THEME ENGINE (TOKEN-BASED)
+-- ═══════════════════════════════════════════════════════════
 
--- Animation Presets
-local AnimationPresets = {
-    Spring = {
-        Style = Enum.EasingStyle.Exponential,
-        Direction = Enum.EasingDirection.Out,
-        Duration = 0.6
-    },
-    Smooth = {
-        Style = Enum.EasingStyle.Quint,
-        Direction = Enum.EasingDirection.Out,
-        Duration = 0.4
-    },
-    Bounce = {
-        Style = Enum.EasingStyle.Back,
-        Direction = Enum.EasingDirection.Out,
-        Duration = 0.5
-    },
-    Instant = {
-        Style = Enum.EasingStyle.Linear,
-        Direction = Enum.EasingDirection.Out,
-        Duration = 0.15
-    }
-}
+local ThemeEngine = {}
+ThemeEngine.__index = ThemeEngine
 
--- Utility Functions
-local function CreateInstance(className, properties)
-    local instance = Instance.new(className)
-    for prop, value in pairs(properties or {}) do
-        if prop ~= "Parent" then
-            pcall(function() instance[prop] = value end)
-        end
-    end
-    if properties.Parent then
-        instance.Parent = properties.Parent
-    end
-    return instance
+function ThemeEngine.new()
+	local self = setmetatable({}, ThemeEngine)
+	self.currentTheme = "Dark"
+	self.themes = {
+		Dark = {
+			-- Background Colors
+			Background = {
+				Primary = Color3.fromRGB(18, 18, 18),
+				Secondary = Color3.fromRGB(25, 25, 25),
+				Tertiary = Color3.fromRGB(32, 32, 32),
+				Elevated = Color3.fromRGB(38, 38, 38),
+				Overlay = Color3.fromRGB(0, 0, 0)
+			},
+			
+			-- Text Colors
+			Text = {
+				Primary = Color3.fromRGB(245, 245, 245),
+				Secondary = Color3.fromRGB(180, 180, 180),
+				Tertiary = Color3.fromRGB(140, 140, 140),
+				Disabled = Color3.fromRGB(100, 100, 100),
+				Inverse = Color3.fromRGB(18, 18, 18)
+			},
+			
+			-- Border Colors
+			Border = {
+				Default = Color3.fromRGB(50, 50, 50),
+				Subtle = Color3.fromRGB(40, 40, 40),
+				Strong = Color3.fromRGB(70, 70, 70),
+				Focus = Color3.fromRGB(80, 140, 255)
+			},
+			
+			-- Action Colors
+			Action = {
+				Primary = Color3.fromRGB(70, 130, 245),
+				PrimaryHover = Color3.fromRGB(85, 145, 255),
+				Secondary = Color3.fromRGB(45, 45, 45),
+				SecondaryHover = Color3.fromRGB(55, 55, 55),
+				Danger = Color3.fromRGB(220, 50, 50),
+				DangerHover = Color3.fromRGB(240, 70, 70),
+				Success = Color3.fromRGB(45, 180, 100),
+				Warning = Color3.fromRGB(240, 160, 50),
+				Info = Color3.fromRGB(60, 150, 220)
+			},
+			
+			-- State Colors
+			State = {
+				Active = Color3.fromRGB(70, 130, 245),
+				Inactive = Color3.fromRGB(80, 80, 80),
+				Hover = Color3.fromRGB(45, 45, 45),
+				Selected = Color3.fromRGB(50, 90, 160),
+				Disabled = Color3.fromRGB(35, 35, 35)
+			}
+		},
+		
+		Light = {
+			Background = {
+				Primary = Color3.fromRGB(255, 255, 255),
+				Secondary = Color3.fromRGB(248, 248, 248),
+				Tertiary = Color3.fromRGB(240, 240, 240),
+				Elevated = Color3.fromRGB(255, 255, 255),
+				Overlay = Color3.fromRGB(255, 255, 255)
+			},
+			
+			Text = {
+				Primary = Color3.fromRGB(20, 20, 20),
+				Secondary = Color3.fromRGB(80, 80, 80),
+				Tertiary = Color3.fromRGB(120, 120, 120),
+				Disabled = Color3.fromRGB(160, 160, 160),
+				Inverse = Color3.fromRGB(255, 255, 255)
+			},
+			
+			Border = {
+				Default = Color3.fromRGB(220, 220, 220),
+				Subtle = Color3.fromRGB(235, 235, 235),
+				Strong = Color3.fromRGB(200, 200, 200),
+				Focus = Color3.fromRGB(70, 130, 245)
+			},
+			
+			Action = {
+				Primary = Color3.fromRGB(60, 120, 235),
+				PrimaryHover = Color3.fromRGB(50, 110, 220),
+				Secondary = Color3.fromRGB(240, 240, 240),
+				SecondaryHover = Color3.fromRGB(230, 230, 230),
+				Danger = Color3.fromRGB(210, 40, 40),
+				DangerHover = Color3.fromRGB(190, 30, 30),
+				Success = Color3.fromRGB(35, 160, 90),
+				Warning = Color3.fromRGB(230, 150, 40),
+				Info = Color3.fromRGB(50, 140, 210)
+			},
+			
+			State = {
+				Active = Color3.fromRGB(60, 120, 235),
+				Inactive = Color3.fromRGB(180, 180, 180),
+				Hover = Color3.fromRGB(245, 245, 245),
+				Selected = Color3.fromRGB(230, 240, 255),
+				Disabled = Color3.fromRGB(245, 245, 245)
+			}
+		}
+	}
+	
+	self.subscribers = {}
+	return self
 end
 
-local function Tween(instance, properties, preset, duration)
-    if not instance or not TweenService then return end
-    
-    preset = preset or AnimationPresets.Smooth
-    duration = duration or preset.Duration
-    
-    local success, tween = pcall(function()
-        return TweenService:Create(
-            instance,
-            TweenInfo.new(duration, preset.Style, preset.Direction),
-            properties
-        )
-    end)
-    
-    if success and tween then
-        pcall(function() tween:Play() end)
-        return tween
-    end
+function ThemeEngine:GetTheme()
+	return self.themes[self.currentTheme]
 end
 
-local function CreateUICorner(radius)
-    return CreateInstance("UICorner", {
-        CornerRadius = UDim.new(0, radius or 12)
-    })
+function ThemeEngine:SetTheme(themeName)
+	if self.themes[themeName] then
+		self.currentTheme = themeName
+		self:NotifySubscribers()
+	else
+		warn("[AKALIB] Theme '" .. themeName .. "' does not exist")
+	end
 end
 
-local function CreateUIStroke(color, thickness, transparency)
-    return CreateInstance("UIStroke", {
-        Color = color or AkaLibEnterprise.CurrentTheme.Border,
-        Thickness = thickness or 1,
-        Transparency = transparency or 0.5,
-        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    })
+function ThemeEngine:Subscribe(callback)
+	table.insert(self.subscribers, callback)
 end
 
-local function CreateUIGradient(colors, rotation)
-    local gradient = CreateInstance("UIGradient", {
-        Rotation = rotation or 0
-    })
-    
-    local colorSequence = {}
-    for i, colorData guardairs(colors) do
-        table.insert(colorSequence, ColorSequenceKeypoint.new(colorData[1], colorData[2]))
-    end
-    gradient.Color = ColorSequence.new(colorSequence)
-    
-    return gradient
+function ThemeEngine:NotifySubscribers()
+	for _, callback in ipairs(self.subscribers) do
+		pcall(callback, self:GetTheme())
+	end
 end
 
-local function CreateGlassmorphism(parent, intensity)
-    intensity = intensity or 1
-    local theme = AkaLibEnterprise.CurrentTheme
-    
-    local blurLayer = CreateInstance("Frame", {
-        Name = "GlassBlur",
-        BackgroundColor3 = theme.Surface,
-        BackgroundTransparency = theme.Glass.Transparency,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = 0,
-        Parent = parent
-    })
-    
-    CreateUICorner(12).Parent = blurLayer
-    
-    local borderHighlight = CreateUIStroke(theme.Glass.Border, 1, 0.6)
-    borderHighlight.Parent = parent
-    
-    return blurLayer, borderHighlight
+-- ═══════════════════════════════════════════════════════════
+-- LOCALIZATION SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local LocalizationEngine = {}
+LocalizationEngine.__index = LocalizationEngine
+
+function LocalizationEngine.new()
+	local self = setmetatable({}, LocalizationEngine)
+	self.currentLocale = "en"
+	self.fallbackLocale = "en"
+	
+	self.dictionaries = {
+		en = {
+			["window.close"] = "Close",
+			["window.minimize"] = "Minimize",
+			["window.maximize"] = "Maximize",
+			["button.ok"] = "OK",
+			["button.cancel"] = "Cancel",
+			["button.apply"] = "Apply",
+			["button.save"] = "Save",
+			["input.placeholder"] = "Enter value...",
+			["dropdown.search"] = "Search...",
+			["keybind.press"] = "Press any key...",
+			["keybind.conflict"] = "Key already bound",
+			["color.hex"] = "HEX",
+			["color.rgb"] = "RGB",
+			["color.hsv"] = "HSV",
+			["dialog.confirm"] = "Confirm",
+			["toast.success"] = "Success",
+			["toast.error"] = "Error",
+			["toast.warning"] = "Warning",
+			["toast.info"] = "Information"
+		},
+		
+		id = {
+			["window.close"] = "Tutup",
+			["window.minimize"] = "Minimalkan",
+			["window.maximize"] = "Maksimalkan",
+			["button.ok"] = "OK",
+			["button.cancel"] = "Batal",
+			["button.apply"] = "Terapkan",
+			["button.save"] = "Simpan",
+			["input.placeholder"] = "Masukkan nilai...",
+			["dropdown.search"] = "Cari...",
+			["keybind.press"] = "Tekan tombol apa saja...",
+			["keybind.conflict"] = "Tombol sudah digunakan",
+			["color.hex"] = "HEX",
+			["color.rgb"] = "RGB",
+			["color.hsv"] = "HSV",
+			["dialog.confirm"] = "Konfirmasi",
+			["toast.success"] = "Berhasil",
+			["toast.error"] = "Kesalahan",
+			["toast.warning"] = "Peringatan",
+			["toast.info"] = "Informasi"
+		}
+	}
+	
+	return self
 end
 
-local function CreateParticleBackground(parent)
-    local particleContainer = CreateInstance("Frame", {
-        Name = "ParticleBackground",
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = 0,
-        Parent = parent
-    })
-    
-    for i = 1, 20 do
-        local particle = CreateInstance("Frame", {
-            Name = "Particle_" .. i,
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-            BackgroundTransparency = 0.92,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6)),
-            Position = UDim2.new(
-                math.random(0, 100) / 100,
-                0,
-                math.random(0, 100) / 100,
-                0
-            ),
-            ZIndex = 0,
-            Parent = particleContainer
-        })
-        
-        CreateUICorner(999).Parent = particle
-        
-        task.spawn(function()
-            while particle.Parent do
-                local randomX = math.random(-40, 40)
-                local randomY = math.random(-40, 40)
-                local randomTime = math.random(4, 7)
-                
-                Tween(particle, {
-                    Position = particle.Position + UDim2.new(0, randomX, 0, randomY),
-                    BackgroundTransparency = math.random(88, 96) / 100
-                }, AnimationPresets.Smooth, randomTime)
-                
-                task.wait(randomTime)
-            end
-        end)
-    end
-    
-    return particleContainer
+function LocalizationEngine:GetText(key)
+	local dictionary = self.dictionaries[self.currentLocale]
+	if dictionary and dictionary[key] then
+		return dictionary[key]
+	end
+	
+	local fallback = self.dictionaries[self.fallbackLocale]
+	if fallback and fallback[key] then
+		return fallback[key]
+	end
+	
+	return key
 end
 
--- Notification System
-function AkaLibEnterprise:Notify(config)
-    config = config or {}
-    
-    task.spawn(function()
-        local notif = CreateInstance("Frame", {
-            Name = "Notification",
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-            BackgroundTransparency = 0.1,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 350, 0, 0),
-            Position = UDim2.new(1, -360, 1, -10),
-            ClipsDescendants = true,
-            ZIndex = 2000
-        })
-        
-        CreateUICorner(16).Parent = notif
-        CreateGlassmorphism(notif, 1.2)
-        
-        local accentBar = CreateInstance("Frame", {
-            Name = "AccentBar",
-            BackgroundColor3 = config.Type == "Error" and AkaLibEnterprise.CurrentTheme.Error or 
-                               config.Type == "Warning" and AkaLibEnterprise.CurrentTheme.Warning or 
-                               config.Type == "Success" and AkaLibEnterprise.CurrentTheme.Success or 
-                               AkaLibEnterprise.CurrentTheme.Accent,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 4, 1, 0),
-            Parent = notif
-        })
-        
-        CreateUICorner(16).Parent = accentBar
-        
-        local iconBg = CreateInstance("Frame", {
-            Name = "IconBackground",
-            BackgroundColor3 = accentBar.BackgroundColor3,
-            BackgroundTransparency = 0.88,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 40, 0, 40),
-            Position = UDim2.new(0, 15, 0, 15),
-            Parent = notif
-        })
-        
-        CreateUICorner(10).Parent = iconBg
-        
-        local icon = CreateInstance("ImageLabel", {
-            Name = "Icon",
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0, 24, 0, 24),
-            Position = UDim2.new(0.5, -12, 0.5, -12),
-            Image = config.Icon or "rbxassetid://7733955511",
-            ImageColor3 = accentBar.BackgroundColor3,
-            Parent = iconBg
-        })
-        
-        local title = CreateInstance("TextLabel", {
-            Name = "Title",
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, -80, 0, 24),
-            Position = UDim2.new(0, 65, 0, 15),
-            Font = Enum.Font.GothamBold,
-            Text = config.Title or "Notification",
-            TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-            TextSize = 15,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            Parent = notif
-        })
-        
-        local subtitle = CreateInstance("TextLabel", {
-            Name = "Subtitle",
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, -80, 0, 36),
-            Position = UDim2.new(0, 65, 0, 39),
-            Font = Enum.Font.Gotham,
-            Text = config.Content or "",
-            TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-            TextSize = 12,
-            TextWrapped = true,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Top,
-            Parent = notif
-        })
-        
-        local progressBg = CreateInstance("Frame", {
-            Name = "ProgressBackground",
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, -20, 0, 3),
-            Position = UDim2.new(0, 10, 1, -8),
-            Parent = notif
-        })
-        
-        CreateUICorner(2).Parent = progressBg
-        
-        local progress = CreateInstance("Frame", {
-            Name = "Progress",
-            BackgroundColor3 = accentBar.BackgroundColor3,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 1, 0),
-            Parent = progressBg
-        })
-        
-        CreateUICorner(2).Parent = progress
-        
-        local notifGui = AkaLibEnterprise.Windows[1] or CoreGui
-        if typeof(notifGui) == "Instance" and notifGui:IsA("ScreenGui") then
-            notif.Parent = notifGui
-        else
-            local sg = CreateInstance("ScreenGui", {
-                Name = "AkaLibNotifications",
-                ResetOnSpawn = false,
-                ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-                DisplayOrder = 999,
-                Parent = gethui and gethui() or CoreGui
-            })
-            notif.Parent = sg
-        end
-        
-        Tween(notif, {Size = UDim2.new(0, 350, 0, 85)}, AnimationPresets.Spring)
-        task.wait(0.1)
-        Tween(notif, {Position = UDim2.new(1, -360, 1, -100)}, AnimationPresets.Bounce)
-        
-        local duration = config.Duration or 5
-        Tween(progress, {Size = UDim2.new(0, 0, 1, 0)}, AnimationPresets.Smooth, duration)
-        
-        task.wait(duration + 0.3)
-        
-        Tween(notif, {
-            Position = UDim2.new(1, 10, notif.Position.Y.Scale, notif.Position.Y.Offset),
-            BackgroundTransparency = 1
-        }, AnimationPresets.Smooth)
-        
-        task.wait(0.5)
-        notif:Destroy()
-    end)
+function LocalizationEngine:SetLocale(locale)
+	if self.dictionaries[locale] then
+		self.currentLocale = locale
+	else
+		warn("[AKALIB] Locale '" .. locale .. "' does not exist")
+	end
 end
 
--- Create Floating Button
-local function CreateFloatingButton(window, mainFrame, screenGui, config)
-    local floatingButton = CreateInstance("Frame", {
-        Name = "FloatingMinimizeButton",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-        BackgroundTransparency = 0.1,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 20, 1, -80),
-        Size = UDim2.new(0, 0, 0, 0),
-        ClipsDescendants = true,
-        Visible = false,
-        ZIndex = 1500,
-        Parent = screenGui
-    })
-    
-    CreateUICorner(20).Parent = floatingButton
-    CreateGlassmorphism(floatingButton, 1.5)
-    
-    local iconContainer = CreateInstance("Frame", {
-        Name = "IconContainer",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-        BackgroundTransparency = 0.1,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 10, 0.5, -20),
-        Size = UDim2.new(0, 40, 0, 40),
-        Parent = floatingButton
-    })
-    
-    CreateUICorner(12).Parent = iconContainer
-    
-    local icon = CreateInstance("ImageLabel", {
-        Name = "Icon",
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 24, 0, 24),
-        Position = UDim2.new(0.5, -12, 0.5, -12),
-        Image = "rbxassetid://7734053426",
-        ImageColor3 = Color3.fromRGB(255, 255, 255),
-        Parent = iconContainer
-    })
-    
-    local textContainer = CreateInstance("Frame", {
-        Name = "TextContainer",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 60, 0, 0),
-        Size = UDim2.new(1, -70, 1, 0),
-        Parent = floatingButton
-    })
-    
-    local title = CreateInstance("TextLabel", {
-        Name = "Title",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 0, 0, 8),
-        Size = UDim2.new(1, 0, 0, 20),
-        Font = Enum.Font.GothamBold,
-        Text = config.Name or "AkaLib",
-        TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd,
-        Parent = textContainer
-    })
-    
-    local subtitle = CreateInstance("TextLabel", {
-        Name = "Subtitle",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 0, 0, 28),
-        Size = UDim2.new(1, 0, 0, 16),
-        Font = Enum.Font.Gotham,
-        Text = "Click to open",
-        TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-        TextSize = 11,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = textContainer
-    })
-    
-    local openButton = CreateInstance("TextButton", {
-        Name = "OpenButton",
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        Text = "",
-        Parent = floatingButton
-    })
-    
-    openButton.MouseEnter:Connect(function()
-        Tween(floatingButton, {BackgroundTransparency = 0.05}, AnimationPresets.Instant)
-        Tween(iconContainer, {Size = UDim2.new(0, 44, 0, 44), Position = UDim2.new(0, 8, 0.5, -22)}, AnimationPresets.Bounce, 0.3)
-    end)
-    
-    openButton.MouseLeave:Connect(function()
-        Tween(floatingButton, {BackgroundTransparency = 0.1}, AnimationPresets.Instant)
-        Tween(iconContainer, {Size = UDim2.new(0, 40, 0, 40), Position = UDim2.new(0, 10, 0.5, -20)}, AnimationPresets.Bounce, 0.3)
-    end)
-    
-    openButton.MouseButton1Click:Connect(function()
-        Tween(floatingButton, {
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 20, 1, -30)
-        }, AnimationPresets.Spring, 0.4)
-        
-        task.wait(0.4)
-        floatingButton.Visible = false
-        
-        mainFrame.Visible = true
-        mainFrame.Size = UDim2.new(0, 0, 0, 0)
-        mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        
-        Tween(mainFrame, {
-            Size = UDim2.new(0, 900, 0, 600),
-            Position = UDim2.new(0.5, -450, 0.5, -300)
-        }, AnimationPresets.Spring, 0.7)
-    end)
-    
-    return floatingButton
+function LocalizationEngine:AddDictionary(locale, dictionary)
+	if not self.dictionaries[locale] then
+		self.dictionaries[locale] = {}
+	end
+	
+	for key, value in pairs(dictionary) do
+		self.dictionaries[locale][key] = value
+	end
 end
 
--- Main Window Creation
-function AkaLibEnterprise:CreateWindow(config)
-    config = config or {}
-    
-    local ScreenGui = CreateInstance("ScreenGui", {
-        Name = "AkaLibEnterprise_" .. (config.Name or "Window"),
-        ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        DisplayOrder = 100,
-        Parent = gethui and gethui() or CoreGui
-    })
-    
-    table.insert(AkaLibEnterprise.Windows, ScreenGui)
-    
-    local Main = CreateInstance("Frame", {
-        Name = "Main",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -450, 0.5, -300),
-        Size = UDim2.new(0, 900, 0, 600),
-        ClipsDescendants = false,
-        Parent = ScreenGui
-    })
-    
-    CreateParticleBackground(Main)
-    
-    local MainPanel = CreateInstance("Frame", {
-        Name = "MainPanel",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Background,
-        BackgroundTransparency = 0.05,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 1, 0),
-        ClipsDescendants = true,
-        Parent = Main
-    })
-    
-    CreateUICorner(20).Parent = MainPanel
-    CreateGlassmorphism(MainPanel, 1.5)
-    
-    local borderStroke = CreateUIStroke(AkaLibEnterprise.CurrentTheme.Accent, 2, 0.3)
-    borderStroke.Parent = MainPanel
-    
-    local borderGradient = CreateUIGradient({
-        {0, AkaLibEnterprise.CurrentTheme.Accent},
-        {0.5, AkaLibEnterprise.CurrentTheme.AccentHover},
-        {1, AkaLibEnterprise.CurrentTheme.Accent}
-    }, 0)
-    borderGradient.Parent = borderStroke
-    
-    task.spawn(function()
-        while Main.Parent do
-            Tween(borderGradient, {Rotation = 360}, AnimationPresets.Smooth, 4)
-            task.wait(4)
-            borderGradient.Rotation = 0
-        end
-    end)
-    
-    local TopBar = CreateInstance("Frame", {
-        Name = "TopBar",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-        BackgroundTransparency = 0.3,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 60),
-        Parent = MainPanel
-    })
-    
-    CreateUICorner(20).Parent = TopBar
-    
-    local topBarAccent = CreateInstance("Frame", {
-        Name = "TopBarAccent",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 2),
-        Position = UDim2.new(0, 0, 1, -2),
-        Parent = TopBar
-    })
-    
-    local logoContainer = CreateInstance("Frame", {
-        Name = "Logo",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-        BackgroundTransparency = 0.85,
-        BorderSizePixel = 0,
-        Size = UDim2.new(0, 40, 0, 40),
-        Position = UDim2.new(0, 15, 0.5, -20),
-        Parent = TopBar
-    })
-    
-    CreateUICorner(10).Parent = logoContainer
-    
-    local logoText = CreateInstance("TextLabel", {
-        Name = "LogoText",
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        Font = Enum.Font.GothamBold,
-        Text = string.sub(config.Name or "AL", 1, 2):upper(),
-        TextColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-        TextSize = 18,
-        Parent = logoContainer
-    })
-    
-    local title = CreateInstance("TextLabel", {
-        Name = "Title",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 65, 0, 12),
-        Size = UDim2.new(0, 300, 0, 20),
-        Font = Enum.Font.GothamBold,
-        Text = config.Name or "AkaLib Enterprise",
-        TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-        TextSize = 16,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TopBar
-    })
-    
-    local subtitle = CreateInstance("TextLabel", {
-        Name = "Subtitle",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 65, 0, 32),
-        Size = UDim2.new(0, 300, 0, 16),
-        Font = Enum.Font.Gotham,
-        Text = config.Subtitle or "Red-Black Edition v2.1",
-        TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TopBar
-    })
-    
-    local floatingButton = CreateFloatingButton(nil, Main, ScreenGui, config)
-    
-    local controlsContainer = CreateInstance("Frame", {
-        Name = "Controls",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(1, -150, 0.5, -15),
-        Size = UDim2.new(0, 140, 0, 30),
-        Parent = TopBar
-    })
-    
-    local controls = {
-        {Name = "Minimize", Icon = "_", Color = AkaLibEnterprise.CurrentTheme.Warning},
-        {Name = "Maximize", Icon = "□", Color = AkaLibEnterprise.CurrentTheme.Info},
-        {Name = "Close", Icon = "×", Color = AkaLibEnterprise.CurrentTheme.Error}
-    }
-    
-    for i, control in ipairs(controls) do
-        local btn = CreateInstance("TextButton", {
-            Name = control.Name,
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-            BackgroundTransparency = 0.5,
-            BorderSizePixel = 0,
-            Position = UDim2.new(0, (i - 1) * 45, 0, 0),
-            Size = UDim2.new(0, 40, 0, 30),
-            Font = Enum.Font.GothamBold,
-            Text = control.Icon,
-            TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-            TextSize = control.Name == "Close" and 20 or 16,
-            AutoButtonColor = false,
-            Parent = controlsContainer
-        })
-        
-        CreateUICorner(8).Parent = btn
-        
-        btn.MouseEnter:Connect(function()
-            Tween(btn, {
-                BackgroundColor3 = control.Color,
-                BackgroundTransparency = 0.2
-            }, AnimationPresets.Instant)
-        end)
-        
-        btn.MouseLeave:Connect(function()
-            Tween(btn, {
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.5
-            }, AnimationPresets.Instant)
-        end)
-        
-        if control.Name == "Minimize" then
-            btn.MouseButton1Click:Connect(function()
-                Tween(Main, {
-                    Size = UDim2.new(0, 0, 0, 0),
-                    Position = UDim2.new(0, 20, 1, -30)
-                }, AnimationPresets.Spring, 0.4)
-                
-                task.wait(0.4)
-                Main.Visible = false
-                
-                floatingButton.Visible = true
-                floatingButton.Size = UDim2.new(0, 0, 0, 0)
-                floatingButton.Position = UDim2.new(0, 20, 1, -30)
-                
-                Tween(floatingButton, {
-                    Size = UDim2.new(0, 280, 0, 60),
-                    Position = UDim2.new(0, 20, 1, -80)
-                }, AnimationPresets.Spring, 0.6)
-            end)
-        end
-        
-        if control.Name == "Close" then
-            btn.MouseButton1Click:Connect(function()
-                Tween(Main, {
-                    Size = UDim2.new(0, 0, 0, 0),
-                    Position = UDim2.new(0.5, 0, 0.5, 0)
-                }, AnimationPresets.Spring, 0.4)
-                task.wait(0.4)
-                ScreenGui:Destroy()
-            end)
-        end
-    end
-    
-    local Sidebar = CreateInstance("Frame", {
-        Name = "Sidebar",
-        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-        BackgroundTransparency = 0.4,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 15, 0, 75),
-        Size = UDim2.new(0, 200, 1, -90),
-        Parent = MainPanel
-    })
-    
-    CreateUICorner(16).Parent = sidebar
-    CreateGlassmorphism(Sidebar, 0.8)
-    
-    local SidebarList = CreateInstance("ScrollingFrame", {
-        Name = "SidebarList",
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 10, 0, 10),
-        Size = UDim2.new(1, -20, 1, -20),
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        ScrollBarThickness = 4,
-        ScrollBarImageColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-        ScrollBarImageTransparency = 0.5,
-        Parent = Sidebar
-    })
-    
-    local SidebarLayout = CreateInstance("UIListLayout", {
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 8),
-        Parent = SidebarList
-    })
-    
-    SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        SidebarList.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 20)
-    end)
-    
-    local ContentArea = CreateInstance("Frame", {
-        Name = "ContentArea",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 230, 0, 75),
-        Size = UDim2.new(1, -245, 1, -90),
-        Parent = MainPanel
-    })
-    
-    local dragging, dragStart, startPos
-    
-    TopBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = Main.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            Tween(Main, {
-                Position = UDim2.new(
-                    startPos.X.Scale,
-                    startPos.X.Offset + delta.X,
-                    startPos.Y.Scale,
-                    startPos.Y.Offset + delta.Y
-                )
-            }, AnimationPresets.Instant, 0.1)
-        end
-    end)
-    
-    local Window = {}
-    Window.Tabs = {}
-    Window.CurrentTab = nil
-    Window.ScreenGui = ScreenGui
-    Window.FloatingButton = floatingButton
-    
-    function Window:CreateTab(tabConfig)
-        tabConfig = tabConfig or {}
-        
-        local TabButton = CreateInstance("TextButton", {
-            Name = "TabButton",
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-            BackgroundTransparency = 0.7,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 45),
-            Text = "",
-            AutoButtonColor = false,
-            Parent = SidebarList
-        })
-        
-        CreateUICorner(12).Parent = TabButton
-        
-        local tabIcon = CreateInstance("ImageLabel", {
-            Name = "Icon",
-            BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0.5, -12),
-            Size = UDim2.new(0, 24, 0, 24),
-            Image = tabConfig.Icon or "rbxassetid://7733964640",
-            ImageColor3 = AkaLibEnterprise.CurrentTheme.TextTertiary,
-            Parent = TabButton
-        })
-        
-        local tabTitle = CreateInstance("TextLabel", {
-            Name = "Title",
-            BackgroundTransparency = 1,
-            Position = UDim2.new(0, 45, 0, 0),
-            Size = UDim2.new(1, -50, 1, 0),
-            Font = Enum.Font.GothamSemibold,
-            Text = tabConfig.Title or "Tab",
-            TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-            TextSize = 14,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = TabButton
-        })
-        
-        local activeIndicator = CreateInstance("Frame", {
-            Name = "ActiveIndicator",
-            BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-            BorderSizePixel = 0,
-            Position = UDim2.new(0, 0, 0.5, -15),
-            Size = UDim2.new(0, 0, 0, 30),
-            Parent = TabButton
-        })
-        
-        CreateUICorner(4).Parent = activeIndicator
-        
-        local TabContent = CreateInstance("ScrollingFrame", {
-            Name = "TabContent",
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 1, 0),
-            CanvasSize = UDim2.new(0, 0, 0, 0),
-            ScrollBarThickness = 6,
-            ScrollBarImageColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-            ScrollBarImageTransparency = 0.3,
-            Visible = false,
-            Parent = ContentArea
-        })
-        
-        -- FIX: Create layout with proper parent setup to avoid locked parent error
-        task.wait()
-        local ContentLayout = CreateInstance("UIListLayout", {
-            SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.new(0, 12)
-        })
-        ContentLayout.Parent = TabContent
-        
-        ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            TabContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
-        end)
-        
-        local Tab = {}
-        Tab.Button = TabButton
-        Tab.Content = TabContent
-        Tab.Active = false
-        
-        local function ActivateTab()
-            for _, t in pairs(Window.Tabs) do
-                t.Active = false
-                t.Content.Visible = false
-                Tween(t.Button, {BackgroundTransparency = 0.7}, AnimationPresets.Instant)
-                if t.Button:FindFirstChild("Icon") then
-                    Tween(t.Button:FindFirstChild("Icon"), {ImageColor3 = AkaLibEnterprise.CurrentTheme.TextTertiary}, AnimationPresets.Instant)
-                end
-                if t.Button:FindFirstChild("Title") then
-                    Tween(t.Button:FindFirstChild("Title"), {TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary}, AnimationPresets.Instant)
-                end
-                if t.Button:FindFirstChild("ActiveIndicator") then
-                    Tween(t.Button:FindFirstChild("ActiveIndicator"), {Size = UDim2.new(0, 0, 0, 30)}, AnimationPresets.Smooth)
-                end
-            end
-            
-            Tab.Active = true
-            TabContent.Visible = true
-            Tween(TabButton, {BackgroundTransparency = 0.2}, AnimationPresets.Instant)
-            Tween(tabIcon, {ImageColor3 = AkaLibEnterprise.CurrentTheme.Accent}, AnimationPresets.Instant)
-            Tween(tabTitle, {TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary}, AnimationPresets.Instant)
-            Tween(activeIndicator, {Size = UDim2.new(0, 4, 0, 30)}, AnimationPresets.Bounce)
-            
-            Window.CurrentTab = Tab
-        end
-        
-        TabButton.MouseButton1Click:Connect(ActivateTab)
-        
-        TabButton.MouseEnter:Connect(function()
-            if not Tab.Active then
-                Tween(TabButton, {BackgroundTransparency = 0.5}, AnimationPresets.Instant)
-            end
-        end)
-        
-        TabButton.MouseLeave:Connect(function()
-            if not Tab.Active then
-                Tween(TabButton, {BackgroundTransparency = 0.7}, AnimationPresets.Instant)
-            end
-        end)
-        
-        table.insert(Window.Tabs, Tab)
-        
-        if #Window.Tabs == 1 then
-            ActivateTab()
-        end
-        
-        -- TAB COMPONENTS
-        function Tab:CreateSection(title)
-            return CreateInstance("TextLabel", {
-                Name = "Section",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, 35),
-                Font = Enum.Font.GothamBold,
-                Text = title or "Section",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 15,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = TabContent
-            })
-        end
-        
-        function Tab:CreateButton(config)
-            config = config or {}
-            
-            local btnContainer = CreateInstance("Frame", {
-                Name = "ButtonContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = btnContainer
-            CreateGlassmorphism(btnContainer, 0.6)
-            
-            local btn = CreateInstance("TextButton", {
-                Name = "Button",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                Font = Enum.Font.GothamSemibold,
-                Text = config.Title or "Button",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                AutoButtonColor = false,
-                Parent = btnContainer
-            })
-            
-            local btnGlow = CreateInstance("Frame", {
-                Name = "Glow",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0),
-                Parent = btnContainer
-            })
-            
-            CreateUICorner(12).Parent = btnGlow
-            
-            btn.MouseEnter:Connect(function()
-                Tween(btnContainer, {BackgroundTransparency = 0.1}, AnimationPresets.Instant)
-                Tween(btnGlow, {BackgroundTransparency = 0.94}, AnimationPresets.Instant)
-            end)
-            
-            btn.MouseLeave:Connect(function()
-                Tween(btnContainer, {BackgroundTransparency = 0.3}, AnimationPresets.Instant)
-                Tween(btnGlow, {BackgroundTransparency = 1}, AnimationPresets.Instant)
-            end)
-            
-            btn.MouseButton1Click:Connect(function()
-                if config.Callback then
-                    task.spawn(config.Callback)
-                end
-            end)
-            
-            return btn
-        end
-        
-        function Tab:CreateToggle(config)
-            config = config or {}
-            
-            local toggleContainer = CreateInstance("Frame", {
-                Name = "ToggleContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = toggleContainer
-            CreateGlassmorphism(toggleContainer, 0.6)
-            
-            local toggleTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(1, -80, 1, 0),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Toggle",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = toggleContainer
-            })
-            
-            local toggleBtn = CreateInstance("TextButton", {
-                Name = "ToggleButton",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -55, 0.5, -13),
-                Size = UDim2.new(0, 48, 0, 26),
-                Text = "",
-                AutoButtonColor = false,
-                Parent = toggleContainer
-            })
-            
-            CreateUICorner(13).Parent = toggleBtn
-            
-            local toggleIndicator = CreateInstance("Frame", {
-                Name = "Indicator",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.TextDisabled,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 3, 0.5, -10),
-                Size = UDim2.new(0, 20, 0, 20),
-                Parent = toggleBtn
-            })
-            
-            CreateUICorner(10).Parent = toggleIndicator
-            
-            local toggled = config.Default or false
-            
-            local function UpdateToggle(state)
-                toggled = state
-                
-                if toggled then
-                    Tween(toggleBtn, {BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent}, AnimationPresets.Smooth)
-                    Tween(toggleIndicator, {
-                        Position = UDim2.new(1, -23, 0.5, -10),
-                        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary
-                    }, AnimationPresets.Bounce)
-                else
-                    Tween(toggleBtn, {BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary}, AnimationPresets.Smooth)
-                    Tween(toggleIndicator, {
-                        Position = UDim2.new(0, 3, 0.5, -10),
-                        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.TextDisabled
-                    }, AnimationPresets.Bounce)
-                end
-                
-                if config.Callback then
-                    task.spawn(config.Callback, toggled)
-                end
-            end
-            
-            toggleBtn.MouseButton1Click:Connect(function()
-                UpdateToggle(not toggled)
-            end)
-            
-            UpdateToggle(toggled)
-            
-            return {
-                Set = function(self, value)
-                    UpdateToggle(value)
-                end,
-                Get = function(self)
-                    return toggled
-                end
-            }
-        end
-        
-        function Tab:CreateSlider(config)
-            config = config or {}
-            
-            local sliderContainer = CreateInstance("Frame", {
-                Name = "SliderContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 70),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = sliderContainer
-            CreateGlassmorphism(sliderContainer, 0.6)
-            
-            local sliderTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 10),
-                Size = UDim2.new(1, -80, 0, 20),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Slider",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = sliderContainer
-            })
-            
-            local valueLabel = CreateInstance("TextLabel", {
-                Name = "Value",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -70, 0, 10),
-                Size = UDim2.new(0, 60, 0, 20),
-                Font = Enum.Font.GothamBold,
-                Text = tostring(config.Default or config.Min or 0) .. (config.Suffix or ""),
-                TextColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Right,
-                Parent = sliderContainer
-            })
-            
-            local sliderTrack = CreateInstance("Frame", {
-                Name = "Track",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 15, 1, -28),
-                Size = UDim2.new(1, -30, 0, 8),
-                Parent = sliderContainer
-            })
-            
-            CreateUICorner(4).Parent = sliderTrack
-            
-            local sliderFill = CreateInstance("Frame", {
-                Name = "Fill",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                BorderSizePixel = 0,
-                Size = UDim2.new(0, 0, 1, 0),
-                Parent = sliderTrack
-            })
-            
-            CreateUICorner(4).Parent = sliderFill
-            
-            -- FIX: Create thumb with proper positioning
-            local sliderThumb = CreateInstance("Frame", {
-                Name = "Thumb",
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -8, 0.5, -8),  -- FIX: Positioned relative to fill
-                Size = UDim2.new(0, 16, 0, 16),
-                ZIndex = 2,
-                AnchorPoint = Vector2.new(0, 0.5),  -- FIX: Set anchor point
-                Parent = sliderFill
-            })
-            
-            CreateUICorner(8).Parent = sliderThumb
-            
-            local min = config.Min or 0
-            local max = config.Max or 100
-            local default = config.Default or min
-            local currentValue = default
-            local dragging = false
-            
-            local function UpdateSlider(value)
-                value = math.clamp(value, min, max)
-                currentValue = value
-                
-                local percent = (value - min) / (max - min)
-                
-                -- FIX: Update fill size without tween for instant response
-                sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-                
-                -- Update value label
-                valueLabel.Text = tostring(math.floor(value)) .. (config.Suffix or "")
-                
-                if config.Callback then
-                    task.spawn(config.Callback, value)
-                end
-            end
-            
-            -- FIX: Better slider interaction
-            sliderTrack.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                    
-                    local function update()
-                        local mousePos = UserInputService:GetMouseLocation().X
-                        local sliderPos = sliderTrack.AbsolutePosition.X
-                        local sliderSize = sliderTrack.AbsoluteSize.X
-                        local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
-                        local value = min + (max - min) * percent
-                        UpdateSlider(value)
-                    end
-                    
-                    update()
-                end
-            end)
-            
-            sliderTrack.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-            
-            -- FIX: Continuous slider update while dragging
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local mousePos = UserInputService:GetMouseLocation().X
-                    local sliderPos = sliderTrack.AbsolutePosition.X
-                    local sliderSize = sliderTrack.AbsoluteSize.X
-                    local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
-                    local value = min + (max - min) * percent
-                    UpdateSlider(value)
-                end
-            end)
-            
-            -- Initialize slider position
-            UpdateSlider(default)
-            
-            return {
-                Set = function(self, value)
-                    UpdateSlider(value)
-                end,
-                Get = function(self)
-                    return currentValue
-                end
-            }
-        end
-        
-        function Tab:CreateDropdown(config)
-            config = config or {}
-            
-            local dropdownContainer = CreateInstance("Frame", {
-                Name = "DropdownContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                ClipsDescendants = false,
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = dropdownContainer
-            CreateGlassmorphism(dropdownContainer, 0.6)
-            
-            local dropdownTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(1, -120, 0, 50),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Dropdown",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = dropdownContainer
-            })
-            
-            local selectedLabel = CreateInstance("TextLabel", {
-                Name = "Selected",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -110, 0, 0),
-                Size = UDim2.new(0, 90, 0, 50),
-                Font = Enum.Font.GothamSemibold,
-                Text = config.Default or "None",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                TextSize = 13,
-                TextXAlignment = Enum.TextXAlignment.Right,
-                TextTruncate = Enum.TextTruncate.AtEnd,
-                Parent = dropdownContainer
-            })
-            
-            local dropdownBtn = CreateInstance("TextButton", {
-                Name = "DropdownButton",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                Text = "",
-                Parent = dropdownContainer
-            })
-            
-            local arrow = CreateInstance("TextLabel", {
-                Name = "Arrow",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -25, 0.5, -8),
-                Size = UDim2.new(0, 16, 0, 16),
-                Font = Enum.Font.GothamBold,
-                Text = "▼",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-                TextSize = 10,
-                Parent = dropdownContainer
-            })
-            
-            local optionsFrame = CreateInstance("Frame", {
-                Name = "OptionsFrame",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.1,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 0, 0, 55),
-                Size = UDim2.new(1, 0, 0, 0),
-                ClipsDescendants = true,
-                Visible = false,
-                ZIndex = 10,
-                Parent = dropdownContainer
-            })
-            
-            CreateUICorner(12).Parent = optionsFrame
-            CreateGlassmorphism(optionsFrame, 1.0)
-            
-            local optionsList = CreateInstance("ScrollingFrame", {
-                Name = "OptionsList",
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0),
-                CanvasSize = UDim2.new(0, 0, 0, 0),
-                ScrollBarThickness = 4,
-                ScrollBarImageColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                Parent = optionsFrame
-            })
-            
-            -- FIX: Create layout properly to avoid parent lock
-            task.wait()
-            local optionsLayout = CreateInstance("UIListLayout", {
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 4)
-            })
-            optionsLayout.Parent = optionsList
-            
-            local opened = false
-            local selected = config.Default
-            
-            local function UpdateOptions()
-                -- Clear existing options
-                for _, child in ipairs(optionsList:GetChildren()) do
-                    if child:IsA("TextButton") then
-                        child:Destroy()
-                    end
-                end
-                
-                for _, option in ipairs(config.Options or {}) do
-                    local optionBtn = CreateInstance("TextButton", {
-                        Name = "Option",
-                        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-                        BackgroundTransparency = 0.3,
-                        BorderSizePixel = 0,
-                        Size = UDim2.new(1, -10, 0, 35),
-                        Font = Enum.Font.Gotham,
-                        Text = option,
-                        TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                        TextSize = 13,
-                        AutoButtonColor = false,
-                        Parent = optionsList
-                    })
-                    
-                    CreateUICorner(8).Parent = optionBtn
-                    
-                    optionBtn.MouseEnter:Connect(function()
-                        Tween(optionBtn, {BackgroundTransparency = 0}, AnimationPresets.Instant)
-                    end)
-                    
-                    optionBtn.MouseLeave:Connect(function()
-                        Tween(optionBtn, {BackgroundTransparency = 0.3}, AnimationPresets.Instant)
-                    end)
-                    
-                    optionBtn.MouseButton1Click:Connect(function()
-                        selected = option
-                        selectedLabel.Text = option
-                        
-                        if config.Callback then
-                            task.spawn(config.Callback, option)
-                        end
-                        
-                        Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, AnimationPresets.Smooth)
-                        Tween(arrow, {Rotation = 0}, AnimationPresets.Smooth)
-                        task.wait(0.3)
-                        optionsFrame.Visible = false
-                        opened = false
-                    end)
-                end
-                
-                optionsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                    optionsList.CanvasSize = UDim2.new(0, 0, 0, optionsLayout.AbsoluteContentSize.Y + 10)
-                end)
-            end
-            
-            dropdownBtn.MouseButton1Click:Connect(function()
-                if opened then
-                    Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, AnimationPresets.Smooth)
-                    Tween(arrow, {Rotation = 0}, AnimationPresets.Smooth)
-                    task.wait(0.3)
-                    optionsFrame.Visible = false
-                else
-                    UpdateOptions()
-                    optionsFrame.Visible = true
-                    local maxHeight = math.min(#(config.Options or {}) * 39, 200)
-                    Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, maxHeight)}, AnimationPresets.Smooth)
-                    Tween(arrow, {Rotation = 180}, AnimationPresets.Smooth)
-                end
-                opened = not opened
-            end)
-            
-            return {
-                Set = function(self, option)
-                    if table.find(config.Options or {}, option) then
-                        selected = option
-                        selectedLabel.Text = option
-                        
-                        if config.Callback then
-                            task.spawn(config.Callback, option)
-                        end
-                    end
-                end,
-                Get = function(self)
-                    return selected
-                end,
-                Refresh = function(self, newOptions)
-                    config.Options = newOptions
-                    UpdateOptions()
-                end
-            }
-        end
-        
-        function Tab:CreateInput(config)
-            config = config or {}
-            
-            local inputContainer = CreateInstance("Frame", {
-                Name = "InputContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = inputContainer
-            CreateGlassmorphism(inputContainer, 0.6)
-            
-            local inputTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(0, 150, 1, 0),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Input",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = inputContainer
-            })
-            
-            local inputBox = CreateInstance("TextBox", {
-                Name = "InputBox",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 170, 0.5, -13),
-                Size = UDim2.new(1, -185, 0, 26),
-                Font = Enum.Font.Gotham,
-                PlaceholderText = config.Placeholder or "Enter text...",
-                PlaceholderColor3 = AkaLibEnterprise.CurrentTheme.TextDisabled,
-                Text = config.Default or "",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 13,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ClearTextOnFocus = false,
-                Parent = inputContainer
-            })
-            
-            CreateUICorner(8).Parent = inputBox
-            CreateUIStroke(AkaLibEnterprise.CurrentTheme.Divider, 1, 0.6).Parent = inputBox
-            
-            local padding = CreateInstance("UIPadding", {
-                PaddingLeft = UDim.new(0, 10),
-                PaddingRight = UDim.new(0, 10),
-                Parent = inputBox
-            })
-            
-            inputBox.Focused:Connect(function()
-                Tween(inputBox:FindFirstChildOfClass("UIStroke"), {Color = AkaLibEnterprise.CurrentTheme.Accent, Transparency = 0.2}, AnimationPresets.Instant)
-            end)
-            
-            inputBox.FocusLost:Connect(function(enterPressed)
-                Tween(inputBox:FindFirstChildOfClass("UIStroke"), {Color = AkaLibEnterprise.CurrentTheme.Divider, Transparency = 0.6}, AnimationPresets.Instant)
-                
-                if enterPressed and config.Callback then
-                    task.spawn(config.Callback, inputBox.Text)
-                end
-            end)
-            
-            return {
-                Set = function(self, text)
-                    inputBox.Text = text
-                end,
-                Get = function(self)
-                    return inputBox.Text
-                end
-            }
-        end
-        
-        function Tab:CreateKeybind(config)
-            config = config or {}
-            
-            local keybindContainer = CreateInstance("Frame", {
-                Name = "KeybindContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = keybindContainer
-            CreateGlassmorphism(keybindContainer, 0.6)
-            
-            local keybindTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(1, -120, 1, 0),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Keybind",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = keybindContainer
-            })
-            
-            local keybindBtn = CreateInstance("TextButton", {
-                Name = "KeybindButton",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -95, 0.5, -13),
-                Size = UDim2.new(0, 80, 0, 26),
-                Font = Enum.Font.GothamSemibold,
-                Text = config.Default and config.Default.Name or "None",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.Accent,
-                TextSize = 12,
-                AutoButtonColor = false,
-                Parent = keybindContainer
-            })
-            
-            CreateUICorner(8).Parent = keybindBtn
-            CreateUIStroke(AkaLibEnterprise.CurrentTheme.Divider, 1, 0.6).Parent = keybindBtn
-            
-            local binding = false
-            local currentKey = config.Default
-            
-            keybindBtn.MouseButton1Click:Connect(function()
-                binding = true
-                keybindBtn.Text = "Press..."
-                Tween(keybindBtn:FindFirstChildOfClass("UIStroke"), {Color = AkaLibEnterprise.CurrentTheme.Accent, Transparency = 0.2}, AnimationPresets.Instant)
-            end)
-            
-            UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if binding then
-                    if input.KeyCode ~= Enum.KeyCode.Unknown then
-                        currentKey = input.KeyCode
-                        keybindBtn.Text = input.KeyCode.Name
-                        binding = false
-                        Tween(keybindBtn:FindFirstChildOfClass("UIStroke"), {Color = AkaLibEnterprise.CurrentTheme.Divider, Transparency = 0.6}, AnimationPresets.Instant)
-                        
-                        if config.Callback then
-                            task.spawn(config.Callback, input.KeyCode)
-                        end
-                    end
-                elseif not gameProcessed and currentKey and input.KeyCode == currentKey then
-                    if config.Callback then
-                        task.spawn(config.Callback, input.KeyCode)
-                    end
-                end
-            end)
-            
-            return {
-                Set = function(self, keyCode)
-                    currentKey = keyCode
-                    keybindBtn.Text = keyCode.Name
-                end,
-                Get = function(self)
-                    return currentKey
-                end
-            }
-        end
-        
-        function Tab:CreateColorPicker(config)
-            config = config or {}
-            
-            local colorContainer = CreateInstance("Frame", {
-                Name = "ColorPickerContainer",
-                BackgroundColor3 = AkaLibEnterprise.CurrentTheme.Surface,
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 50),
-                Parent = TabContent
-            })
-            
-            CreateUICorner(12).Parent = colorContainer
-            CreateGlassmorphism(colorContainer, 0.6)
-            
-            local colorTitle = CreateInstance("TextLabel", {
-                Name = "Title",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(1, -80, 1, 0),
-                Font = Enum.Font.Gotham,
-                Text = config.Title or "Color Picker",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextPrimary,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = colorContainer
-            })
-            
-            local colorDisplay = CreateInstance("TextButton", {
-                Name = "ColorDisplay",
-                BackgroundColor3 = config.Default or Color3.fromRGB(255, 255, 255),
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -55, 0.5, -13),
-                Size = UDim2.new(0, 40, 0, 26),
-                Text = "",
-                AutoButtonColor = false,
-                Parent = colorContainer
-            })
-            
-            CreateUICorner(8).Parent = colorDisplay
-            CreateUIStroke(AkaLibEnterprise.CurrentTheme.Divider, 2, 0.4).Parent = colorDisplay
-            
-            local currentColor = config.Default or Color3.fromRGB(255, 255, 255)
-            
-            colorDisplay.MouseButton1Click:Connect(function()
-                AkaLibEnterprise:Notify({
-                    Title = "Color Picker",
-                    Content = "Color picker UI coming soon...",
-                    Type = "Info",
-                    Duration = 3
-                })
-            end)
-            
-            return {
-                Set = function(self, color)
-                    currentColor = color
-                    colorDisplay.BackgroundColor3 = color
-                    
-                    if config.Callback then
-                        task.spawn(config.Callback, color)
-                    end
-                end,
-                Get = function(self)
-                    return currentColor
-                end
-            }
-        end
-        
-        function Tab:CreateLabel(text)
-            local label = CreateInstance("TextLabel", {
-                Name = "Label",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, 30),
-                Font = Enum.Font.Gotham,
-                Text = text or "Label",
-                TextColor3 = AkaLibEnterprise.CurrentTheme.TextSecondary,
-                TextSize = 13,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = TabContent
-            })
-            
-            return {
-                Set = function(self, newText)
-                    label.Text = newText
-                end
-            }
-        end
-        
-        return Tab
-    end
-    
-    Main.Size = UDim2.new(0, 0, 0, 0)
-    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    
-    Tween(Main, {
-        Size = UDim2.new(0, 900, 0, 600),
-        Position = UDim2.new(0.5, -450, 0.5, -300)
-    }, AnimationPresets.Spring, 0.8)
-    
-    return Window
+-- ═══════════════════════════════════════════════════════════
+-- LOGGING & DEBUG SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local Logger = {}
+Logger.__index = Logger
+
+function Logger.new()
+	local self = setmetatable({}, Logger)
+	self.debugMode = false
+	self.logs = {}
+	self.maxLogs = 1000
+	
+	return self
 end
 
-function AkaLibEnterprise:SetTheme(themeName)
-    if self.Themes[themeName] then
-        self.CurrentTheme = self.Themes[themeName]
-        self:Notify({
-            Title = "Theme Changed",
-            Content = "Switched to " .. self.CurrentTheme.Name,
-            Type = "Success",
-            Duration = 3
-        })
-    end
+function Logger:SetDebugMode(enabled)
+	self.debugMode = enabled
 end
 
-return AkaLibEnterprise
+function Logger:Log(level, category, message)
+	local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+	local logEntry = {
+		timestamp = timestamp,
+		level = level,
+		category = category,
+		message = message
+	}
+	
+	table.insert(self.logs, logEntry)
+	
+	if #self.logs > self.maxLogs then
+		table.remove(self.logs, 1)
+	end
+	
+	if self.debugMode then
+		local prefix = string.format("[AKALIB][%s][%s]", level, category)
+		print(prefix, message)
+	end
+end
+
+function Logger:Info(category, message)
+	self:Log("INFO", category, message)
+end
+
+function Logger:Warning(category, message)
+	self:Log("WARNING", category, message)
+	warn("[AKALIB][" .. category .. "]", message)
+end
+
+function Logger:Error(category, message)
+	self:Log("ERROR", category, message)
+	warn("[AKALIB][ERROR][" .. category .. "]", message)
+end
+
+function Logger:GetLogs(level, category)
+	local filtered = {}
+	for _, log in ipairs(self.logs) do
+		local matchLevel = not level or log.level == level
+		local matchCategory = not category or log.category == category
+		if matchLevel and matchCategory then
+			table.insert(filtered, log)
+		end
+	end
+	return filtered
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- CONFIG MANAGEMENT SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local ConfigManager = {}
+ConfigManager.__index = ConfigManager
+
+function ConfigManager.new()
+	local self = setmetatable({}, ConfigManager)
+	self.configs = {}
+	self.currentProfile = "default"
+	self.autoSave = true
+	self.configVersion = "1.0.0"
+	
+	return self
+end
+
+function ConfigManager:LoadConfig(profileName)
+	profileName = profileName or self.currentProfile
+	
+	local success, data = pcall(function()
+		return HttpService:JSONDecode(readfile("AKALIB_" .. profileName .. ".json"))
+	end)
+	
+	if success and data then
+		if self:MigrateConfig(data) then
+			self.configs[profileName] = data
+			return true
+		end
+	end
+	
+	return false
+end
+
+function ConfigManager:SaveConfig(profileName)
+	profileName = profileName or self.currentProfile
+	
+	local config = self.configs[profileName] or {}
+	config._version = self.configVersion
+	config._timestamp = os.time()
+	
+	local success, err = pcall(function()
+		writefile("AKALIB_" .. profileName .. ".json", HttpService:JSONEncode(config))
+	end)
+	
+	return success
+end
+
+function ConfigManager:MigrateConfig(config)
+	if not config._version then
+		config._version = "1.0.0"
+	end
+	
+	return true
+end
+
+function ConfigManager:Set(profileName, key, value)
+	profileName = profileName or self.currentProfile
+	
+	if not self.configs[profileName] then
+		self.configs[profileName] = {}
+	end
+	
+	self.configs[profileName][key] = value
+	
+	if self.autoSave then
+		self:SaveConfig(profileName)
+	end
+end
+
+function ConfigManager:Get(profileName, key, default)
+	profileName = profileName or self.currentProfile
+	
+	if self.configs[profileName] and self.configs[profileName][key] ~= nil then
+		return self.configs[profileName][key]
+	end
+	
+	return default
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- KEY VALIDATION SYSTEM (ENTERPRISE)
+-- ═══════════════════════════════════════════════════════════
+
+local KeySystem = {}
+KeySystem.__index = KeySystem
+
+function KeySystem.new()
+	local self = setmetatable({}, KeySystem)
+	self.validKeys = {}
+	self.environment = "prod"
+	self.validationEndpoint = nil
+	
+	return self
+end
+
+function KeySystem:SetEnvironment(env)
+	if env == "dev" or env == "prod" then
+		self.environment = env
+	end
+end
+
+function KeySystem:ValidateKey(key, options)
+	options = options or {}
+	
+	local result = {
+		valid = false,
+		expired = false,
+		message = "",
+		data = {}
+	}
+	
+	if not key or key == "" then
+		result.message = "Invalid key format"
+		return result
+	end
+	
+	if self.environment == "dev" then
+		result.valid = true
+		result.message = "Development mode - key validation bypassed"
+		return result
+	end
+	
+	if self.validationEndpoint then
+		local success, response = pcall(function()
+			return HttpService:PostAsync(self.validationEndpoint, HttpService:JSONEncode({
+				key = key,
+				hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+			}))
+		end)
+		
+		if success then
+			local data = HttpService:JSONDecode(response)
+			result.valid = data.valid or false
+			result.expired = data.expired or false
+			result.message = data.message or ""
+			result.data = data.data or {}
+			return result
+		end
+	end
+	
+	for _, validKey in ipairs(self.validKeys) do
+		if validKey.key == key then
+			if validKey.expiration and os.time() > validKey.expiration then
+				result.expired = true
+				result.message = "Key has expired"
+				return result
+			end
+			
+			result.valid = true
+			result.message = "Key validated successfully"
+			result.data = validKey.data or {}
+			return result
+		end
+	end
+	
+	result.message = "Invalid key"
+	return result
+end
+
+function KeySystem:AddKey(key, expiration, data)
+	table.insert(self.validKeys, {
+		key = key,
+		expiration = expiration,
+		data = data or {}
+	})
+end
+
+function KeySystem:SetValidationEndpoint(url)
+	self.validationEndpoint = url
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- PLUGIN & EXTENSION SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local PluginManager = {}
+PluginManager.__index = PluginManager
+
+function PluginManager.new()
+	local self = setmetatable({}, PluginManager)
+	self.plugins = {}
+	self.hooks = {
+		onInit = {},
+		onDestroy = {},
+		onWindowCreate = {},
+		onComponentCreate = {}
+	}
+	
+	return self
+end
+
+function PluginManager:RegisterPlugin(name, plugin)
+	if self.plugins[name] then
+		warn("[AKALIB] Plugin '" .. name .. "' already registered")
+		return false
+	end
+	
+	self.plugins[name] = plugin
+	
+	if plugin.onInit then
+		table.insert(self.hooks.onInit, plugin.onInit)
+	end
+	
+	if plugin.onDestroy then
+		table.insert(self.hooks.onDestroy, plugin.onDestroy)
+	end
+	
+	return true
+end
+
+function PluginManager:ExecuteHook(hookName, ...)
+	if self.hooks[hookName] then
+		for _, callback in ipairs(self.hooks[hookName]) do
+			pcall(callback, ...)
+		end
+	end
+end
+
+function PluginManager:GetPlugin(name)
+	return self.plugins[name]
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- WINDOW MANAGEMENT SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local WindowManager = {}
+WindowManager.__index = WindowManager
+
+function WindowManager.new(library)
+	local self = setmetatable({}, WindowManager)
+	self.library = library
+	self.windows = {}
+	self.activeWindow = nil
+	self.baseZIndex = 10
+	
+	return self
+end
+
+function WindowManager:CreateWindow(options)
+	local windowId = #self.windows + 1
+	local zIndex = self.baseZIndex + (windowId * 10)
+	
+	local window = {
+		id = windowId,
+		title = options.title or "Window",
+		size = options.size or UDim2.new(0, 600, 0, 400),
+		position = options.position or UDim2.new(0.5, -300, 0.5, -200),
+		minimized = false,
+		focused = true,
+		zIndex = zIndex,
+		tabs = {},
+		currentTab = nil,
+		elements = {}
+	}
+	
+	window.gui = self:BuildWindowGUI(window)
+	
+	table.insert(self.windows, window)
+	self:FocusWindow(window)
+	
+	self.library.pluginManager:ExecuteHook("onWindowCreate", window)
+	self.library.logger:Info("WindowManager", "Window created: " .. window.title)
+	
+	return window
+end
+
+function WindowManager:BuildWindowGUI(window)
+	local theme = self.library.themeEngine:GetTheme()
+	
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "AKALIB_Window_" .. window.id
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = CoreGui
+	
+	local mainFrame = Instance.new("Frame")
+	mainFrame.Name = "MainFrame"
+	mainFrame.Size = window.size
+	mainFrame.Position = window.position
+	mainFrame.BackgroundColor3 = theme.Background.Primary
+	mainFrame.BorderSizePixel = 0
+	mainFrame.ZIndex = window.zIndex
+	mainFrame.ClipsDescendants = true
+	mainFrame.Parent = screenGui
+	
+	local mainCorner = Instance.new("UICorner")
+	mainCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.MD)
+	mainCorner.Parent = mainFrame
+	
+	local mainStroke = Instance.new("UIStroke")
+	mainStroke.Color = theme.Border.Default
+	mainStroke.Thickness = 1
+	mainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	mainStroke.Parent = mainFrame
+	
+	local shadow = Instance.new("ImageLabel")
+	shadow.Name = "Shadow"
+	shadow.Size = UDim2.new(1, 30, 1, 30)
+	shadow.Position = UDim2.new(0, -15, 0, -15)
+	shadow.BackgroundTransparency = 1
+	shadow.Image = "rbxassetid://5554236805"
+	shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	shadow.ImageTransparency = 0.7
+	shadow.ScaleType = Enum.ScaleType.Slice
+	shadow.SliceCenter = Rect.new(23, 23, 277, 277)
+	shadow.ZIndex = window.zIndex - 1
+	shadow.Parent = mainFrame
+	
+	local titleBar = Instance.new("Frame")
+	titleBar.Name = "TitleBar"
+	titleBar.Size = UDim2.new(1, 0, 0, 40)
+	titleBar.BackgroundColor3 = theme.Background.Secondary
+	titleBar.BorderSizePixel = 0
+	titleBar.ZIndex = window.zIndex + 1
+	titleBar.Parent = mainFrame
+	
+	local titleCorner = Instance.new("UICorner")
+	titleCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.MD)
+	titleCorner.Parent = titleBar
+	
+	local titleFix = Instance.new("Frame")
+	titleFix.Size = UDim2.new(1, 0, 0, 20)
+	titleFix.Position = UDim2.new(0, 0, 1, -20)
+	titleFix.BackgroundColor3 = theme.Background.Secondary
+	titleFix.BorderSizePixel = 0
+	titleFix.ZIndex = window.zIndex + 1
+	titleFix.Parent = titleBar
+	
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Name = "TitleLabel"
+	titleLabel.Size = UDim2.new(1, -100, 1, 0)
+	titleLabel.Position = UDim2.new(0, DesignTokens.Spacing.LG, 0, 0)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = window.title
+	titleLabel.TextColor3 = theme.Text.Primary
+	titleLabel.TextSize = DesignTokens.FontSize.MD
+	titleLabel.Font = Enum.Font.GothamMedium
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.ZIndex = window.zIndex + 2
+	titleLabel.Parent = titleBar
+	
+	local buttonContainer = Instance.new("Frame")
+	buttonContainer.Name = "ButtonContainer"
+	buttonContainer.Size = UDim2.new(0, 80, 1, 0)
+	buttonContainer.Position = UDim2.new(1, -80, 0, 0)
+	buttonContainer.BackgroundTransparency = 1
+	buttonContainer.ZIndex = window.zIndex + 2
+	buttonContainer.Parent = titleBar
+	
+	local buttonLayout = Instance.new("UIListLayout")
+	buttonLayout.FillDirection = Enum.FillDirection.Horizontal
+	buttonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	buttonLayout.Padding = UDim.new(0, DesignTokens.Spacing.XS)
+	buttonLayout.Parent = buttonContainer
+	
+	local minimizeButton = self:CreateTitleBarButton(window, "−", function()
+		self:MinimizeWindow(window)
+	end)
+	minimizeButton.Parent = buttonContainer
+	
+	local closeButton = self:CreateTitleBarButton(window, "✕", function()
+		self:CloseWindow(window)
+	end)
+	closeButton.Parent = buttonContainer
+	
+	local contentContainer = Instance.new("Frame")
+	contentContainer.Name = "ContentContainer"
+	contentContainer.Size = UDim2.new(1, 0, 1, -40)
+	contentContainer.Position = UDim2.new(0, 0, 0, 40)
+	contentContainer.BackgroundTransparency = 1
+	contentContainer.ZIndex = window.zIndex + 1
+	contentContainer.ClipsDescendants = true
+	contentContainer.Parent = mainFrame
+	
+	local tabBar = Instance.new("Frame")
+	tabBar.Name = "TabBar"
+	tabBar.Size = UDim2.new(0, 160, 1, 0)
+	tabBar.BackgroundColor3 = theme.Background.Secondary
+	tabBar.BorderSizePixel = 0
+	tabBar.ZIndex = window.zIndex + 2
+	tabBar.Parent = contentContainer
+	
+	local tabBarBorder = Instance.new("Frame")
+	tabBarBorder.Name = "Border"
+	tabBarBorder.Size = UDim2.new(0, 1, 1, 0)
+	tabBarBorder.Position = UDim2.new(1, 0, 0, 0)
+	tabBarBorder.BackgroundColor3 = theme.Border.Default
+	tabBarBorder.BorderSizePixel = 0
+	tabBarBorder.ZIndex = window.zIndex + 2
+	tabBarBorder.Parent = tabBar
+	
+	local tabListContainer = Instance.new("ScrollingFrame")
+	tabListContainer.Name = "TabListContainer"
+	tabListContainer.Size = UDim2.new(1, 0, 1, 0)
+	tabListContainer.BackgroundTransparency = 1
+	tabListContainer.BorderSizePixel = 0
+	tabListContainer.ScrollBarThickness = 4
+	tabListContainer.ScrollBarImageColor3 = theme.Border.Strong
+	tabListContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+	tabListContainer.ZIndex = window.zIndex + 3
+	tabListContainer.Parent = tabBar
+	
+	local tabListLayout = Instance.new("UIListLayout")
+	tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	tabListLayout.Padding = UDim.new(0, DesignTokens.Spacing.XXS)
+	tabListLayout.Parent = tabListContainer
+	
+	tabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		tabListContainer.CanvasSize = UDim2.new(0, 0, 0, tabListLayout.AbsoluteContentSize.Y + DesignTokens.Spacing.SM)
+	end)
+	
+	local tabListPadding = Instance.new("UIPadding")
+	tabListPadding.PaddingTop = UDim.new(0, DesignTokens.Spacing.SM)
+	tabListPadding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.SM)
+	tabListPadding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.XS)
+	tabListPadding.PaddingRight = UDim.new(0, DesignTokens.Spacing.XS)
+	tabListPadding.Parent = tabListContainer
+	
+	local tabContent = Instance.new("Frame")
+	tabContent.Name = "TabContent"
+	tabContent.Size = UDim2.new(1, -160, 1, 0)
+	tabContent.Position = UDim2.new(0, 160, 0, 0)
+	tabContent.BackgroundColor3 = theme.Background.Primary
+	tabContent.BorderSizePixel = 0
+	tabContent.ZIndex = window.zIndex + 2
+	tabContent.Parent = contentContainer
+	
+	self:MakeDraggable(titleBar, mainFrame)
+	
+	window.gui = screenGui
+	window.elements = {
+		main = mainFrame,
+		titleBar = titleBar,
+		titleLabel = titleLabel,
+		tabBar = tabBar,
+		tabListContainer = tabListContainer,
+		tabContent = tabContent
+	}
+	
+	return screenGui
+end
+
+function WindowManager:CreateTitleBarButton(window, text, callback)
+	local theme = self.library.themeEngine:GetTheme()
+	
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 32, 0, 32)
+	button.BackgroundColor3 = theme.Background.Secondary
+	button.BackgroundTransparency = 1
+	button.Text = text
+	button.TextColor3 = theme.Text.Secondary
+	button.TextSize = DesignTokens.FontSize.LG
+	button.Font = Enum.Font.GothamMedium
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.ZIndex = window.zIndex + 3
+	
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundTransparency = 0,
+			BackgroundColor3 = theme.State.Hover
+		}):Play()
+	end)
+	
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundTransparency = 1
+		}):Play()
+	end)
+	
+	button.MouseButton1Click:Connect(callback)
+	
+	return button
+end
+
+function WindowManager:MakeDraggable(titleBar, frame)
+	local dragging = false
+	local dragStart = nil
+	local startPos = nil
+	
+	titleBar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	titleBar.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+end
+
+function WindowManager:FocusWindow(window)
+	if self.activeWindow == window then
+		return
+	end
+	
+	for _, win in ipairs(self.windows) do
+		win.focused = false
+	end
+	
+	window.focused = true
+	self.activeWindow = window
+end
+
+function WindowManager:MinimizeWindow(window)
+	window.minimized = not window.minimized
+	
+	local targetSize = window.minimized 
+		and UDim2.new(window.size.X.Scale, window.size.X.Offset, 0, 40)
+		or window.size
+	
+	TweenService:Create(window.elements.main, TweenInfo.new(DesignTokens.Duration.Base / 1000), {
+		Size = targetSize
+	}):Play()
+end
+
+function WindowManager:CloseWindow(window)
+	if window.gui then
+		window.gui:Destroy()
+	end
+	
+	for i, win in ipairs(self.windows) do
+		if win == window then
+			table.remove(self.windows, i)
+			break
+		end
+	end
+	
+	self.library.logger:Info("WindowManager", "Window closed: " .. window.title)
+end
+
+function WindowManager:AddTab(window, name)
+	local theme = self.library.themeEngine:GetTheme()
+	
+	local tab = {
+		name = name,
+		sections = {},
+		active = false
+	}
+	
+	local tabButton = Instance.new("TextButton")
+	tabButton.Name = "Tab_" .. name
+	tabButton.Size = UDim2.new(1, -DesignTokens.Spacing.SM, 0, 36)
+	tabButton.BackgroundColor3 = theme.Background.Secondary
+	tabButton.Text = name
+	tabButton.TextColor3 = theme.Text.Secondary
+	tabButton.TextSize = DesignTokens.FontSize.Base
+	tabButton.Font = Enum.Font.Gotham
+	tabButton.TextXAlignment = Enum.TextXAlignment.Left
+	tabButton.BorderSizePixel = 0
+	tabButton.AutoButtonColor = false
+	tabButton.ZIndex = window.zIndex + 4
+	tabButton.Parent = window.elements.tabListContainer
+	
+	local tabCorner = Instance.new("UICorner")
+	tabCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	tabCorner.Parent = tabButton
+	
+	local tabPadding = Instance.new("UIPadding")
+	tabPadding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.MD)
+	tabPadding.Parent = tabButton
+	
+	local contentFrame = Instance.new("ScrollingFrame")
+	contentFrame.Name = "Content_" .. name
+	contentFrame.Size = UDim2.new(1, 0, 1, 0)
+	contentFrame.BackgroundTransparency = 1
+	contentFrame.BorderSizePixel = 0
+	contentFrame.ScrollBarThickness = 6
+	contentFrame.ScrollBarImageColor3 = theme.Border.Strong
+	contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+	contentFrame.Visible = false
+	contentFrame.ZIndex = window.zIndex + 3
+	contentFrame.Parent = window.elements.tabContent
+	
+	local contentLayout = Instance.new("UIListLayout")
+	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	contentLayout.Padding = UDim.new(0, DesignTokens.Spacing.MD)
+	contentLayout.Parent = contentFrame
+	
+	contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + DesignTokens.Spacing.XL)
+	end)
+	
+	local contentPadding = Instance.new("UIPadding")
+	contentPadding.PaddingTop = UDim.new(0, DesignTokens.Spacing.LG)
+	contentPadding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.LG)
+	contentPadding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.LG)
+	contentPadding.PaddingRight = UDim.new(0, DesignTokens.Spacing.LG)
+	contentPadding.Parent = contentFrame
+	
+	tab.elements = {
+		button = tabButton,
+		content = contentFrame
+	}
+	
+	tabButton.MouseButton1Click:Connect(function()
+		self:SelectTab(window, tab)
+	end)
+	
+	tabButton.MouseEnter:Connect(function()
+		if not tab.active then
+			TweenService:Create(tabButton, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+				BackgroundColor3 = theme.State.Hover
+			}):Play()
+		end
+	end)
+	
+	tabButton.MouseLeave:Connect(function()
+		if not tab.active then
+			TweenService:Create(tabButton, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+				BackgroundColor3 = theme.Background.Secondary
+			}):Play()
+		end
+	end)
+	
+	table.insert(window.tabs, tab)
+	
+	if #window.tabs == 1 then
+		self:SelectTab(window, tab)
+	end
+	
+	return tab
+end
+
+function WindowManager:SelectTab(window, tab)
+	local theme = self.library.themeEngine:GetTheme()
+	
+	for _, t in ipairs(window.tabs) do
+		t.active = false
+		t.elements.content.Visible = false
+		t.elements.button.BackgroundColor3 = theme.Background.Secondary
+		t.elements.button.TextColor3 = theme.Text.Secondary
+	end
+	
+	tab.active = true
+	tab.elements.content.Visible = true
+	tab.elements.button.BackgroundColor3 = theme.State.Selected
+	tab.elements.button.TextColor3 = theme.Text.Primary
+	
+	window.currentTab = tab
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- UI COMPONENT FACTORY
+-- ═══════════════════════════════════════════════════════════
+
+local ComponentFactory = {}
+ComponentFactory.__index = ComponentFactory
+
+function ComponentFactory.new(library)
+	local self = setmetatable({}, ComponentFactory)
+	self.library = library
+	
+	return self
+end
+
+function ComponentFactory:CreateButton(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local variant = options.variant or "primary"
+	local text = options.text or "Button"
+	local callback = options.callback or function() end
+	
+	local colors = {
+		primary = {
+			normal = theme.Action.Primary,
+			hover = theme.Action.PrimaryHover,
+			text = theme.Text.Inverse
+		},
+		secondary = {
+			normal = theme.Action.Secondary,
+			hover = theme.Action.SecondaryHover,
+			text = theme.Text.Primary
+		},
+		danger = {
+			normal = theme.Action.Danger,
+			hover = theme.Action.DangerHover,
+			text = theme.Text.Inverse
+		}
+	}
+	
+	local colorScheme = colors[variant] or colors.primary
+	
+	local container = Instance.new("Frame")
+	container.Name = "ButtonContainer"
+	container.Size = UDim2.new(1, 0, 0, 36)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local button = Instance.new("TextButton")
+	button.Name = "Button"
+	button.Size = UDim2.new(1, 0, 1, 0)
+	button.BackgroundColor3 = colorScheme.normal
+	button.Text = text
+	button.TextColor3 = colorScheme.text
+	button.TextSize = DesignTokens.FontSize.Base
+	button.Font = Enum.Font.GothamMedium
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = button
+	
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = colorScheme.hover
+		}):Play()
+	end)
+	
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = colorScheme.normal
+		}):Play()
+	end)
+	
+	button.MouseButton1Click:Connect(callback)
+	
+	return container
+end
+
+function ComponentFactory:CreateToggle(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Toggle"
+	local default = options.default or false
+	local callback = options.callback or function() end
+	
+	local state = default
+	
+	local container = Instance.new("Frame")
+	container.Name = "ToggleContainer"
+	container.Size = UDim2.new(1, 0, 0, 36)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local button = Instance.new("TextButton")
+	button.Name = "ToggleButton"
+	button.Size = UDim2.new(1, 0, 1, 0)
+	button.BackgroundColor3 = theme.Background.Secondary
+	button.Text = ""
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = button
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, -60, 1, 0)
+	label.Position = UDim2.new(0, DesignTokens.Spacing.MD, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = button
+	
+	local switchFrame = Instance.new("Frame")
+	switchFrame.Name = "Switch"
+	switchFrame.Size = UDim2.new(0, 44, 0, 24)
+	switchFrame.Position = UDim2.new(1, -56, 0.5, -12)
+	switchFrame.BackgroundColor3 = state and theme.Action.Primary or theme.State.Inactive
+	switchFrame.BorderSizePixel = 0
+	switchFrame.Parent = button
+	
+	local switchCorner = Instance.new("UICorner")
+	switchCorner.CornerRadius = UDim.new(1, 0)
+	switchCorner.Parent = switchFrame
+	
+	local knob = Instance.new("Frame")
+	knob.Name = "Knob"
+	knob.Size = UDim2.new(0, 20, 0, 20)
+	knob.Position = state and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	knob.BorderSizePixel = 0
+	knob.Parent = switchFrame
+	
+	local knobCorner = Instance.new("UICorner")
+	knobCorner.CornerRadius = UDim.new(1, 0)
+	knobCorner.Parent = knob
+	
+	local function updateToggle()
+		TweenService:Create(switchFrame, TweenInfo.new(DesignTokens.Duration.Base / 1000), {
+			BackgroundColor3 = state and theme.Action.Primary or theme.State.Inactive
+		}):Play()
+		
+		TweenService:Create(knob, TweenInfo.new(DesignTokens.Duration.Base / 1000), {
+			Position = state and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+		}):Play()
+		
+		pcall(callback, state)
+	end
+	
+	button.MouseButton1Click:Connect(function()
+		state = not state
+		updateToggle()
+	end)
+	
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = theme.State.Hover
+		}):Play()
+	end)
+	
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = theme.Background.Secondary
+		}):Play()
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateSlider(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Slider"
+	local min = options.min or 0
+	local max = options.max or 100
+	local default = options.default or min
+	local precision = options.precision or 1
+	local callback = options.callback or function() end
+	
+	local value = default
+	
+	local container = Instance.new("Frame")
+	container.Name = "SliderContainer"
+	container.Size = UDim2.new(1, 0, 0, 50)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local background = Instance.new("Frame")
+	background.Name = "Background"
+	background.Size = UDim2.new(1, 0, 1, 0)
+	background.BackgroundColor3 = theme.Background.Secondary
+	background.BorderSizePixel = 0
+	background.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = background
+	
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingRight = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.Parent = background
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, -60, 0, 14)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = background
+	
+	local valueLabel = Instance.new("TextLabel")
+	valueLabel.Name = "ValueLabel"
+	valueLabel.Size = UDim2.new(0, 50, 0, 14)
+	valueLabel.Position = UDim2.new(1, -50, 0, 0)
+	valueLabel.BackgroundTransparency = 1
+	valueLabel.Text = tostring(value)
+	valueLabel.TextColor3 = theme.Text.Secondary
+	valueLabel.TextSize = DesignTokens.FontSize.Base
+	valueLabel.Font = Enum.Font.GothamMedium
+	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+	valueLabel.Parent = background
+	
+	local sliderTrack = Instance.new("Frame")
+	sliderTrack.Name = "Track"
+	sliderTrack.Size = UDim2.new(1, 0, 0, 4)
+	sliderTrack.Position = UDim2.new(0, 0, 1, -4)
+	sliderTrack.BackgroundColor3 = theme.Border.Default
+	sliderTrack.BorderSizePixel = 0
+	sliderTrack.Parent = background
+	
+	local trackCorner = Instance.new("UICorner")
+	trackCorner.CornerRadius = UDim.new(1, 0)
+	trackCorner.Parent = sliderTrack
+	
+	local sliderFill = Instance.new("Frame")
+	sliderFill.Name = "Fill"
+	sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+	sliderFill.BackgroundColor3 = theme.Action.Primary
+	sliderFill.BorderSizePixel = 0
+	sliderFill.Parent = sliderTrack
+	
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(1, 0)
+	fillCorner.Parent = sliderFill
+	
+	local dragging = false
+	
+	local function updateSlider(input)
+		local relativeX = math.clamp((input.Position.X - sliderTrack.AbsolutePosition.X) / sliderTrack.AbsoluteSize.X, 0, 1)
+		value = math.floor((min + (max - min) * relativeX) / precision + 0.5) * precision
+		value = math.clamp(value, min, max)
+		
+		sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+		valueLabel.Text = tostring(value)
+		
+		pcall(callback, value)
+	end
+	
+	sliderTrack.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input)
+		end
+	end)
+	
+	sliderTrack.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			updateSlider(input)
+		end
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateInput(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Input"
+	local placeholder = options.placeholder or self.library.localization:GetText("input.placeholder")
+	local default = options.default or ""
+	local callback = options.callback or function() end
+	
+	local container = Instance.new("Frame")
+	container.Name = "InputContainer"
+	container.Size = UDim2.new(1, 0, 0, 60)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local background = Instance.new("Frame")
+	background.Name = "Background"
+	background.Size = UDim2.new(1, 0, 1, 0)
+	background.BackgroundColor3 = theme.Background.Secondary
+	background.BorderSizePixel = 0
+	background.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = background
+	
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingRight = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.Parent = background
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, 0, 0, 14)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = background
+	
+	local inputFrame = Instance.new("Frame")
+	inputFrame.Name = "InputFrame"
+	inputFrame.Size = UDim2.new(1, 0, 0, 28)
+	inputFrame.Position = UDim2.new(0, 0, 1, -28)
+	inputFrame.BackgroundColor3 = theme.Background.Primary
+	inputFrame.BorderSizePixel = 0
+	inputFrame.Parent = background
+	
+	local inputCorner = Instance.new("UICorner")
+	inputCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	inputCorner.Parent = inputFrame
+	
+	local inputStroke = Instance.new("UIStroke")
+	inputStroke.Color = theme.Border.Default
+	inputStroke.Thickness = 1
+	inputStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	inputStroke.Parent = inputFrame
+	
+	local textBox = Instance.new("TextBox")
+	textBox.Name = "TextBox"
+	textBox.Size = UDim2.new(1, -DesignTokens.Spacing.SM * 2, 1, 0)
+	textBox.Position = UDim2.new(0, DesignTokens.Spacing.SM, 0, 0)
+	textBox.BackgroundTransparency = 1
+	textBox.Text = default
+	textBox.PlaceholderText = placeholder
+	textBox.TextColor3 = theme.Text.Primary
+	textBox.PlaceholderColor3 = theme.Text.Tertiary
+	textBox.TextSize = DesignTokens.FontSize.Base
+	textBox.Font = Enum.Font.Gotham
+	textBox.TextXAlignment = Enum.TextXAlignment.Left
+	textBox.ClearTextOnFocus = false
+	textBox.Parent = inputFrame
+	
+	textBox.Focused:Connect(function()
+		inputStroke.Color = theme.Border.Focus
+	end)
+	
+	textBox.FocusLost:Connect(function()
+		inputStroke.Color = theme.Border.Default
+		pcall(callback, textBox.Text)
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateDropdown(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Dropdown"
+	local items = options.items or {"Option 1", "Option 2", "Option 3"}
+	local default = options.default or items[1]
+	local callback = options.callback or function() end
+	
+	local selected = default
+	local expanded = false
+	
+	local container = Instance.new("Frame")
+	container.Name = "DropdownContainer"
+	container.Size = UDim2.new(1, 0, 0, 60)
+	container.BackgroundTransparency = 1
+	container.ZIndex = 1
+	container.Parent = parent
+	
+	local background = Instance.new("Frame")
+	background.Name = "Background"
+	background.Size = UDim2.new(1, 0, 0, 60)
+	background.BackgroundColor3 = theme.Background.Secondary
+	background.BorderSizePixel = 0
+	background.ZIndex = 2
+	background.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = background
+	
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingRight = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.Parent = background
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, 0, 0, 14)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 3
+	label.Parent = background
+	
+	local dropdownButton = Instance.new("TextButton")
+	dropdownButton.Name = "DropdownButton"
+	dropdownButton.Size = UDim2.new(1, 0, 0, 28)
+	dropdownButton.Position = UDim2.new(0, 0, 1, -28)
+	dropdownButton.BackgroundColor3 = theme.Background.Primary
+	dropdownButton.Text = ""
+	dropdownButton.BorderSizePixel = 0
+	dropdownButton.AutoButtonColor = false
+	dropdownButton.ZIndex = 3
+	dropdownButton.Parent = background
+	
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	buttonCorner.Parent = dropdownButton
+	
+	local buttonStroke = Instance.new("UIStroke")
+	buttonStroke.Color = theme.Border.Default
+	buttonStroke.Thickness = 1
+	buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	buttonStroke.Parent = dropdownButton
+	
+	local selectedLabel = Instance.new("TextLabel")
+	selectedLabel.Name = "SelectedLabel"
+	selectedLabel.Size = UDim2.new(1, -30, 1, 0)
+	selectedLabel.Position = UDim2.new(0, DesignTokens.Spacing.SM, 0, 0)
+	selectedLabel.BackgroundTransparency = 1
+	selectedLabel.Text = selected
+	selectedLabel.TextColor3 = theme.Text.Primary
+	selectedLabel.TextSize = DesignTokens.FontSize.Base
+	selectedLabel.Font = Enum.Font.Gotham
+	selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
+	selectedLabel.ZIndex = 4
+	selectedLabel.Parent = dropdownButton
+	
+	local arrow = Instance.new("TextLabel")
+	arrow.Name = "Arrow"
+	arrow.Size = UDim2.new(0, 20, 1, 0)
+	arrow.Position = UDim2.new(1, -20, 0, 0)
+	arrow.BackgroundTransparency = 1
+	arrow.Text = "▼"
+	arrow.TextColor3 = theme.Text.Secondary
+	arrow.TextSize = DesignTokens.FontSize.SM
+	arrow.Font = Enum.Font.Gotham
+	arrow.ZIndex = 4
+	arrow.Parent = dropdownButton
+	
+	local itemsList = Instance.new("Frame")
+	itemsList.Name = "ItemsList"
+	itemsList.Size = UDim2.new(1, 0, 0, 0)
+	itemsList.Position = UDim2.new(0, 0, 1, 4)
+	itemsList.BackgroundColor3 = theme.Background.Elevated
+	itemsList.BorderSizePixel = 0
+	itemsList.Visible = false
+	itemsList.ClipsDescendants = true
+	itemsList.ZIndex = DesignTokens.ZIndex.Dropdown
+	itemsList.Parent = container
+	
+	local listCorner = Instance.new("UICorner")
+	listCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	listCorner.Parent = itemsList
+	
+	local listStroke = Instance.new("UIStroke")
+	listStroke.Color = theme.Border.Strong
+	listStroke.Thickness = 1
+	listStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	listStroke.Parent = itemsList
+	
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Padding = UDim.new(0, 2)
+	listLayout.Parent = itemsList
+	
+	local listPadding = Instance.new("UIPadding")
+	listPadding.PaddingTop = UDim.new(0, 4)
+	listPadding.PaddingBottom = UDim.new(0, 4)
+	listPadding.PaddingLeft = UDim.new(0, 4)
+	listPadding.PaddingRight = UDim.new(0, 4)
+	listPadding.Parent = itemsList
+	
+	for _, item in ipairs(items) do
+		local itemButton = Instance.new("TextButton")
+		itemButton.Name = "Item_" .. item
+		itemButton.Size = UDim2.new(1, 0, 0, 28)
+		itemButton.BackgroundColor3 = theme.Background.Elevated
+		itemButton.Text = item
+		itemButton.TextColor3 = theme.Text.Primary
+		itemButton.TextSize = DesignTokens.FontSize.Base
+		itemButton.Font = Enum.Font.Gotham
+		itemButton.TextXAlignment = Enum.TextXAlignment.Left
+		itemButton.BorderSizePixel = 0
+		itemButton.AutoButtonColor = false
+		itemButton.ZIndex = DesignTokens.ZIndex.Dropdown + 1
+		itemButton.Parent = itemsList
+		
+		local itemCorner = Instance.new("UICorner")
+		itemCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+		itemCorner.Parent = itemButton
+		
+		local itemPadding = Instance.new("UIPadding")
+		itemPadding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.SM)
+		itemPadding.Parent = itemButton
+		
+		itemButton.MouseEnter:Connect(function()
+			itemButton.BackgroundColor3 = theme.State.Hover
+		end)
+		
+		itemButton.MouseLeave:Connect(function()
+			itemButton.BackgroundColor3 = theme.Background.Elevated
+		end)
+		
+		itemButton.MouseButton1Click:Connect(function()
+			selected = item
+			selectedLabel.Text = item
+			expanded = false
+			itemsList.Visible = false
+			arrow.Text = "▼"
+			container.Size = UDim2.new(1, 0, 0, 60)
+			pcall(callback, item)
+		end)
+	end
+	
+	dropdownButton.MouseButton1Click:Connect(function()
+		expanded = not expanded
+		itemsList.Visible = expanded
+		arrow.Text = expanded and "▲" or "▼"
+		
+		if expanded then
+			local listHeight = (#items * 30) + 8
+			itemsList.Size = UDim2.new(1, 0, 0, listHeight)
+			container.Size = UDim2.new(1, 0, 0, 60 + listHeight + 4)
+		else
+			container.Size = UDim2.new(1, 0, 0, 60)
+		end
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateColorPicker(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Color Picker"
+	local default = options.default or Color3.fromRGB(255, 255, 255)
+	local callback = options.callback or function() end
+	
+	local selectedColor = default
+	
+	local container = Instance.new("Frame")
+	container.Name = "ColorPickerContainer"
+	container.Size = UDim2.new(1, 0, 0, 36)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local button = Instance.new("TextButton")
+	button.Name = "ColorPickerButton"
+	button.Size = UDim2.new(1, 0, 1, 0)
+	button.BackgroundColor3 = theme.Background.Secondary
+	button.Text = ""
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = button
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, -50, 1, 0)
+	label.Position = UDim2.new(0, DesignTokens.Spacing.MD, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = button
+	
+	local colorPreview = Instance.new("Frame")
+	colorPreview.Name = "ColorPreview"
+	colorPreview.Size = UDim2.new(0, 32, 0, 24)
+	colorPreview.Position = UDim2.new(1, -44, 0.5, -12)
+	colorPreview.BackgroundColor3 = selectedColor
+	colorPreview.BorderSizePixel = 0
+	colorPreview.Parent = button
+	
+	local previewCorner = Instance.new("UICorner")
+	previewCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	previewCorner.Parent = colorPreview
+	
+	local previewStroke = Instance.new("UIStroke")
+	previewStroke.Color = theme.Border.Default
+	previewStroke.Thickness = 1
+	previewStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	previewStroke.Parent = colorPreview
+	
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = theme.State.Hover
+		}):Play()
+	end)
+	
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+			BackgroundColor3 = theme.Background.Secondary
+		}):Play()
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateKeybind(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Keybind"
+	local default = options.default or Enum.KeyCode.E
+	local callback = options.callback or function() end
+	
+	local selectedKey = default
+	local listening = false
+	
+	local container = Instance.new("Frame")
+	container.Name = "KeybindContainer"
+	container.Size = UDim2.new(1, 0, 0, 36)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local button = Instance.new("TextButton")
+	button.Name = "KeybindButton"
+	button.Size = UDim2.new(1, 0, 1, 0)
+	button.BackgroundColor3 = theme.Background.Secondary
+	button.Text = ""
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.Parent = container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	corner.Parent = button
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, -100, 1, 0)
+	label.Position = UDim2.new(0, DesignTokens.Spacing.MD, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Primary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = button
+	
+	local keyLabel = Instance.new("TextLabel")
+	keyLabel.Name = "KeyLabel"
+	keyLabel.Size = UDim2.new(0, 80, 0, 24)
+	keyLabel.Position = UDim2.new(1, -92, 0.5, -12)
+	keyLabel.BackgroundColor3 = theme.Background.Primary
+	keyLabel.Text = selectedKey.Name
+	keyLabel.TextColor3 = theme.Text.Primary
+	keyLabel.TextSize = DesignTokens.FontSize.SM
+	keyLabel.Font = Enum.Font.GothamMedium
+	keyLabel.BorderSizePixel = 0
+	keyLabel.Parent = button
+	
+	local keyCorner = Instance.new("UICorner")
+	keyCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.SM)
+	keyCorner.Parent = keyLabel
+	
+	local keyStroke = Instance.new("UIStroke")
+	keyStroke.Color = theme.Border.Default
+	keyStroke.Thickness = 1
+	keyStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	keyStroke.Parent = keyLabel
+	
+	button.MouseButton1Click:Connect(function()
+		listening = true
+		keyLabel.Text = "..."
+		keyStroke.Color = theme.Border.Focus
+	end)
+	
+	button.MouseEnter:Connect(function()
+		if not listening then
+			TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+				BackgroundColor3 = theme.State.Hover
+			}):Play()
+		end
+	end)
+	
+	button.MouseLeave:Connect(function()
+		if not listening then
+			TweenService:Create(button, TweenInfo.new(DesignTokens.Duration.Fast / 1000), {
+				BackgroundColor3 = theme.Background.Secondary
+			}):Play()
+		end
+	end)
+	
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if listening and not gameProcessed then
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				selectedKey = input.KeyCode
+				keyLabel.Text = selectedKey.Name
+				keyStroke.Color = theme.Border.Default
+				listening = false
+				pcall(callback, selectedKey)
+			end
+		end
+	end)
+	
+	return container
+end
+
+function ComponentFactory:CreateLabel(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local text = options.text or "Label"
+	
+	local container = Instance.new("Frame")
+	container.Name = "LabelContainer"
+	container.Size = UDim2.new(1, 0, 0, 20)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = theme.Text.Secondary
+	label.TextSize = DesignTokens.FontSize.Base
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextWrapped = true
+	label.Parent = container
+	
+	return container
+end
+
+function ComponentFactory:CreateDivider(parent)
+	local theme = self.library.themeEngine:GetTheme()
+	
+	local divider = Instance.new("Frame")
+	divider.Name = "Divider"
+	divider.Size = UDim2.new(1, 0, 0, 1)
+	divider.BackgroundColor3 = theme.Border.Subtle
+	divider.BorderSizePixel = 0
+	divider.Parent = parent
+	
+	return divider
+end
+
+function ComponentFactory:CreateSection(parent, options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local title = options.title or "Section"
+	
+	local container = Instance.new("Frame")
+	container.Name = "SectionContainer"
+	container.Size = UDim2.new(1, 0, 0, 30)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Name = "TitleLabel"
+	titleLabel.Size = UDim2.new(1, 0, 1, 0)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = title
+	titleLabel.TextColor3 = theme.Text.Primary
+	titleLabel.TextSize = DesignTokens.FontSize.MD
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Parent = container
+	
+	return container
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- NOTIFICATION SYSTEM
+-- ═══════════════════════════════════════════════════════════
+
+local NotificationManager = {}
+NotificationManager.__index = NotificationManager
+
+function NotificationManager.new(library)
+	local self = setmetatable({}, NotificationManager)
+	self.library = library
+	self.notifications = {}
+	self.container = nil
+	
+	self:CreateContainer()
+	
+	return self
+end
+
+function NotificationManager:CreateContainer()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "AKALIB_Notifications"
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = CoreGui
+	
+	local container = Instance.new("Frame")
+	container.Name = "Container"
+	container.Size = UDim2.new(0, 320, 1, -20)
+	container.Position = UDim2.new(1, -330, 0, 10)
+	container.BackgroundTransparency = 1
+	container.Parent = screenGui
+	
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.VerticalAlignment = Enum.VerticalAlignment.Top
+	layout.Padding = UDim.new(0, DesignTokens.Spacing.SM)
+	layout.Parent = container
+	
+	self.container = container
+end
+
+function NotificationManager:Show(options)
+	local theme = self.library.themeEngine:GetTheme()
+	options = options or {}
+	
+	local type = options.type or "info"
+	local title = options.title or "Notification"
+	local message = options.message or ""
+	local duration = options.duration or 3000
+	
+	local colors = {
+		info = theme.Action.Info,
+		success = theme.Action.Success,
+		warning = theme.Action.Warning,
+		error = theme.Action.Danger
+	}
+	
+	local color = colors[type] or colors.info
+	
+	local notification = Instance.new("Frame")
+	notification.Name = "Notification"
+	notification.Size = UDim2.new(1, 0, 0, 0)
+	notification.BackgroundColor3 = theme.Background.Elevated
+	notification.BorderSizePixel = 0
+	notification.ZIndex = DesignTokens.ZIndex.Toast
+	notification.Parent = self.container
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, DesignTokens.Radius.MD)
+	corner.Parent = notification
+	
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = color
+	stroke.Thickness = 2
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Parent = notification
+	
+	local accent = Instance.new("Frame")
+	accent.Name = "Accent"
+	accent.Size = UDim2.new(0, 4, 1, 0)
+	accent.BackgroundColor3 = color
+	accent.BorderSizePixel = 0
+	accent.ZIndex = DesignTokens.ZIndex.Toast + 1
+	accent.Parent = notification
+	
+	local accentCorner = Instance.new("UICorner")
+	accentCorner.CornerRadius = UDim.new(0, DesignTokens.Radius.MD)
+	accentCorner.Parent = accent
+	
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingBottom = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.PaddingLeft = UDim.new(0, DesignTokens.Spacing.MD + 4)
+	padding.PaddingRight = UDim.new(0, DesignTokens.Spacing.MD)
+	padding.Parent = notification
+	
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Name = "Title"
+	titleLabel.Size = UDim2.new(1, 0, 0, 16)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = title
+	titleLabel.TextColor3 = theme.Text.Primary
+	titleLabel.TextSize = DesignTokens.FontSize.MD
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.ZIndex = DesignTokens.ZIndex.Toast + 2
+	titleLabel.Parent = notification
+	
+	local messageLabel = Instance.new("TextLabel")
+	messageLabel.Name = "Message"
+	messageLabel.Size = UDim2.new(1, 0, 0, 0)
+	messageLabel.Position = UDim2.new(0, 0, 0, 20)
+	messageLabel.BackgroundTransparency = 1
+	messageLabel.Text = message
+	messageLabel.TextColor3 = theme.Text.Secondary
+	messageLabel.TextSize = DesignTokens.FontSize.Base
+	messageLabel.Font = Enum.Font.Gotham
+	messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+	messageLabel.TextWrapped = true
+	messageLabel.ZIndex = DesignTokens.ZIndex.Toast + 2
+	messageLabel.Parent = notification
+	
+	messageLabel.Size = UDim2.new(1, 0, 0, messageLabel.TextBounds.Y)
+	
+	local totalHeight = 20 + messageLabel.TextBounds.Y + (DesignTokens.Spacing.MD * 2)
+	
+	notification.Size = UDim2.new(1, 0, 0, 0)
+	TweenService:Create(notification, TweenInfo.new(DesignTokens.Duration.Base / 1000, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, 0, 0, totalHeight)
+	}):Play()
+	
+	task.delay(duration / 1000, function()
+		TweenService:Create(notification, TweenInfo.new(DesignTokens.Duration.Base / 1000, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			Size = UDim2.new(1, 0, 0, 0)
+		}):Play()
+		
+		task.wait(DesignTokens.Duration.Base / 1000)
+		notification:Destroy()
+	end)
+	
+	table.insert(self.notifications, notification)
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- MAIN LIBRARY INITIALIZATION
+-- ═══════════════════════════════════════════════════════════
+
+function AKALIB:Init(options)
+	options = options or {}
+	
+	local lib = setmetatable({}, {__index = AKALIB})
+	
+	lib.themeEngine = ThemeEngine.new()
+	lib.localization = LocalizationEngine.new()
+	lib.logger = Logger.new()
+	lib.configManager = ConfigManager.new()
+	lib.keySystem = KeySystem.new()
+	lib.pluginManager = PluginManager.new()
+	lib.windowManager = WindowManager.new(lib)
+	lib.componentFactory = ComponentFactory.new(lib)
+	lib.notificationManager = NotificationManager.new(lib)
+	
+	if options.debugMode then
+		lib.logger:SetDebugMode(true)
+	end
+	
+	if options.locale then
+		lib.localization:SetLocale(options.locale)
+	end
+	
+	if options.theme then
+		lib.themeEngine:SetTheme(options.theme)
+	end
+	
+	lib.pluginManager:ExecuteHook("onInit", lib)
+	
+	lib.logger:Info("Core", "AKALIB v" .. AKALIB._VERSION .. " initialized successfully")
+	
+	return lib
+end
+
+function AKALIB:CreateWindow(title, options)
+	options = options or {}
+	options.title = title
+	
+	return self.windowManager:CreateWindow(options)
+end
+
+function AKALIB:AddTab(window, name)
+	return self.windowManager:AddTab(window, name)
+end
+
+function AKALIB:Notify(options)
+	self.notificationManager:Show(options)
+end
+
+function AKALIB:SetTheme(themeName)
+	self.themeEngine:SetTheme(themeName)
+	self.logger:Info("Theme", "Theme changed to: " .. themeName)
+end
+
+function AKALIB:SetLocale(locale)
+	self.localization:SetLocale(locale)
+	self.logger:Info("Localization", "Locale changed to: " .. locale)
+end
+
+function AKALIB:ValidateKey(key, options)
+	return self.keySystem:ValidateKey(key, options)
+end
+
+function AKALIB:SaveConfig(profile)
+	return self.configManager:SaveConfig(profile)
+end
+
+function AKALIB:LoadConfig(profile)
+	return self.configManager:LoadConfig(profile)
+end
+
+function AKALIB:AddComponent(tab, componentType, options)
+	if componentType == "Button" then
+		return self.componentFactory:CreateButton(tab.elements.content, options)
+	elseif componentType == "Toggle" then
+		return self.componentFactory:CreateToggle(tab.elements.content, options)
+	elseif componentType == "Slider" then
+		return self.componentFactory:CreateSlider(tab.elements.content, options)
+	elseif componentType == "Input" then
+		return self.componentFactory:CreateInput(tab.elements.content, options)
+	elseif componentType == "Dropdown" then
+		return self.componentFactory:CreateDropdown(tab.elements.content, options)
+	elseif componentType == "ColorPicker" then
+		return self.componentFactory:CreateColorPicker(tab.elements.content, options)
+	elseif componentType == "Keybind" then
+		return self.componentFactory:CreateKeybind(tab.elements.content, options)
+	elseif componentType == "Label" then
+		return self.componentFactory:CreateLabel(tab.elements.content, options)
+	elseif componentType == "Divider" then
+		return self.componentFactory:CreateDivider(tab.elements.content)
+	elseif componentType == "Section" then
+		return self.componentFactory:CreateSection(tab.elements.content, options)
+	else
+		self.logger:Warning("ComponentFactory", "Unknown component type: " .. tostring(componentType))
+		return nil
+	end
+end
+
+-- ═══════════════════════════════════════════════════════════
+-- EXPORT
+-- ═══════════════════════════════════════════════════════════
+
+return AKALIB
