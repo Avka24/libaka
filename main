@@ -1,13 +1,13 @@
 --[[
     ╔═══════════════════════════════════════════════════════════════╗
     ║           AkaLib Enterprise Edition UI Library                ║
-    ║         Premium with Red-Black Theme & All Features          ║
-    ║                    Version 2.1 FIXED                          ║
+    ║         FIXED: UIListLayout & Slider Thumb Issues            ║
+    ║                    Version 2.1.1 FIXED                        ║
     ╚═══════════════════════════════════════════════════════════════╝
 ]]
 
 local AkaLibEnterprise = {}
-AkaLibEnterprise.Version = "2.1.0-Enterprise"
+AkaLibEnterprise.Version = "2.1.1-Fixed"
 AkaLibEnterprise.Flags = {}
 AkaLibEnterprise.Windows = {}
 AkaLibEnterprise.Notifications = {}
@@ -35,7 +35,7 @@ AkaLibEnterprise.Themes = {
         
         Success = Color3.fromRGB(34, 197, 94),
         Warning = Color3.fromRGB(251, 191, 36),
-        Error = Color3.fromRGB(239, 68, 68),
+        Error = wide behind, 68, 68),
         Info = Color3.fromRGB(99, 102, 241),
         
         TextPrimary = Color3.fromRGB(255, 250, 252),
@@ -200,7 +200,7 @@ local function CreateUIGradient(colors, rotation)
     })
     
     local colorSequence = {}
-    for i, colorData in ipairs(colors) do
+    for i, colorData guardairs(colors) do
         table.insert(colorSequence, ColorSequenceKeypoint.new(colorData[1], colorData[2]))
     end
     gradient.Color = ColorSequence.new(colorSequence)
@@ -745,7 +745,7 @@ function AkaLibEnterprise:CreateWindow(config)
         Parent = MainPanel
     })
     
-    CreateUICorner(16).Parent = Sidebar
+    CreateUICorner(16).Parent = sidebar
     CreateGlassmorphism(Sidebar, 0.8)
     
     local SidebarList = CreateInstance("ScrollingFrame", {
@@ -878,11 +878,13 @@ function AkaLibEnterprise:CreateWindow(config)
             Parent = ContentArea
         })
         
+        -- FIX: Create layout with proper parent setup to avoid locked parent error
+        task.wait()
         local ContentLayout = CreateInstance("UIListLayout", {
             SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.new(0, 12),
-            Parent = TabContent
+            Padding = UDim.new(0, 12)
         })
+        ContentLayout.Parent = TabContent
         
         ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             TabContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
@@ -1137,7 +1139,7 @@ function AkaLibEnterprise:CreateWindow(config)
                 Position = UDim2.new(1, -70, 0, 10),
                 Size = UDim2.new(0, 60, 0, 20),
                 Font = Enum.Font.GothamBold,
-                Text = tostring(config.Default or config.Min or 0),
+                Text = tostring(config.Default or config.Min or 0) .. (config.Suffix or ""),
                 TextColor3 = AkaLibEnterprise.CurrentTheme.Accent,
                 TextSize = 14,
                 TextXAlignment = Enum.TextXAlignment.Right,
@@ -1165,13 +1167,15 @@ function AkaLibEnterprise:CreateWindow(config)
             
             CreateUICorner(4).Parent = sliderFill
             
+            -- FIX: Create thumb with proper positioning
             local sliderThumb = CreateInstance("Frame", {
                 Name = "Thumb",
                 BackgroundColor3 = Color3.fromRGB(255, 255, 255),
                 BorderSizePixel = 0,
-                Position = UDim2.new(0, -8, 0.5, -8),
+                Position = UDim2.new(1, -8, 0.5, -8),  -- FIX: Positioned relative to fill
                 Size = UDim2.new(0, 16, 0, 16),
                 ZIndex = 2,
+                AnchorPoint = Vector2.new(0, 0.5),  -- FIX: Set anchor point
                 Parent = sliderFill
             })
             
@@ -1188,25 +1192,33 @@ function AkaLibEnterprise:CreateWindow(config)
                 currentValue = value
                 
                 local percent = (value - min) / (max - min)
-                Tween(sliderFill, {Size = UDim2.new(percent, 0, 1, 0)}, AnimationPresets.Instant, 0.1)
                 
-                valueLabel.Text = tostring(value) .. (config.Suffix or "")
+                -- FIX: Update fill size without tween for instant response
+                sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+                
+                -- Update value label
+                valueLabel.Text = tostring(math.floor(value)) .. (config.Suffix or "")
                 
                 if config.Callback then
                     task.spawn(config.Callback, value)
                 end
             end
             
+            -- FIX: Better slider interaction
             sliderTrack.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = true
                     
-                    local mousePos = input.Position.X
-                    local sliderPos = sliderTrack.AbsolutePosition.X
-                    local sliderSize = sliderTrack.AbsoluteSize.X
-                    local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
-                    local value = math.floor(min + (max - min) * percent)
-                    UpdateSlider(value)
+                    local function update()
+                        local mousePos = UserInputService:GetMouseLocation().X
+                        local sliderPos = sliderTrack.AbsolutePosition.X
+                        local sliderSize = sliderTrack.AbsoluteSize.X
+                        local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
+                        local value = min + (max - min) * percent
+                        UpdateSlider(value)
+                    end
+                    
+                    update()
                 end
             end)
             
@@ -1216,17 +1228,19 @@ function AkaLibEnterprise:CreateWindow(config)
                 end
             end)
             
+            -- FIX: Continuous slider update while dragging
             UserInputService.InputChanged:Connect(function(input)
                 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local mousePos = input.Position.X
+                    local mousePos = UserInputService:GetMouseLocation().X
                     local sliderPos = sliderTrack.AbsolutePosition.X
                     local sliderSize = sliderTrack.AbsoluteSize.X
                     local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
-                    local value = math.floor(min + (max - min) * percent)
+                    local value = min + (max - min) * percent
                     UpdateSlider(value)
                 end
             end)
             
+            -- Initialize slider position
             UpdateSlider(default)
             
             return {
@@ -1329,23 +1343,29 @@ function AkaLibEnterprise:CreateWindow(config)
                 Parent = optionsFrame
             })
             
+            -- FIX: Create layout properly to avoid parent lock
+            task.wait()
             local optionsLayout = CreateInstance("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 4),
-                Parent = optionsList
+                Padding = UDim.new(0, 4)
             })
+            optionsLayout.Parent = optionsList
             
             local opened = false
             local selected = config.Default
             
             local function UpdateOptions()
-                optionsList:ClearAllChildren()
-                optionsLayout.Parent = optionsList
+                -- Clear existing options
+                for _, child in ipairs(optionsList:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
                 
                 for _, option in ipairs(config.Options or {}) do
                     local optionBtn = CreateInstance("TextButton", {
                         Name = "Option",
-                        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.TabBackground,
+                        BackgroundColor3 = AkaLibEnterprise.CurrentTheme.BackgroundSecondary,
                         BackgroundTransparency = 0.3,
                         BorderSizePixel = 0,
                         Size = UDim2.new(1, -10, 0, 35),
