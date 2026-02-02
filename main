@@ -1,21 +1,53 @@
 --[[
     AkaLib UI Library
-    Modern & Professional Roblox UI Framework
-    Version 1.0.0
-    by akalib
+    Fixed version with error handling
+    Version 1.0.1
 ]]
 
 local AkaLib = {}
 AkaLib.Flags = {}
 AkaLib.CurrentWindow = nil
 
+-- Safe Service Loading
+local function GetService(serviceName)
+    local success, service = pcall(function()
+        return game:GetService(serviceName)
+    end)
+    
+    if not success then
+        warn("AkaLib: Failed to load " .. serviceName)
+        return nil
+    end
+    
+    return service
+end
+
 -- Services
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
+local TweenService = GetService("TweenService")
+local UserInputService = GetService("UserInputService")
+local RunService = GetService("RunService")
+local HttpService = GetService("HttpService")
+local CoreGui = GetService("CoreGui")
+local Players = GetService("Players")
+
+-- Validate Critical Services
+if not TweenService or not UserInputService then
+    error("AkaLib requires TweenService and UserInputService")
+end
+
+-- Check for gethui support
+local function GetParent()
+    if gethui then
+        return gethui()
+    elseif syn and syn.protect_gui then
+        local gui = Instance.new("ScreenGui")
+        syn.protect_gui(gui)
+        gui.Parent = CoreGui
+        return gui.Parent
+    else
+        return CoreGui
+    end
+end
 
 -- Theme Configuration
 AkaLib.Theme = {
@@ -25,7 +57,7 @@ AkaLib.Theme = {
     ElementBackground = Color3.fromRGB(28, 28, 38),
     ElementHover = Color3.fromRGB(35, 35, 48),
     
-    Accent = Color3.fromRGB(88, 101, 242), -- Discord Blurple (customizable)
+    Accent = Color3.fromRGB(88, 101, 242),
     AccentHover = Color3.fromRGB(105, 118, 255),
     AccentDark = Color3.fromRGB(71, 82, 196),
     
@@ -40,7 +72,6 @@ AkaLib.Theme = {
     Shadow = Color3.fromRGB(0, 0, 0),
     Divider = Color3.fromRGB(40, 40, 52),
     
-    GlassBlur = 0.85,
     CornerRadius = 12,
     Spacing = 8
 }
@@ -55,18 +86,8 @@ AkaLib.Locale = {
             KeySystem = "Key System",
             EnterKey = "Enter Key",
             Submit = "Submit",
-            CopyKey = "Copy Key",
-            Copied = "Copied!",
             InvalidKey = "Invalid Key",
             ValidKey = "Valid Key",
-            Search = "Search...",
-            Toggle = "Toggle",
-            Slider = "Slider",
-            Dropdown = "Dropdown",
-            Button = "Button",
-            Input = "Input",
-            Keybind = "Keybind",
-            ColorPicker = "Color Picker",
             PressKey = "Press any key...",
         },
         id = {
@@ -75,18 +96,8 @@ AkaLib.Locale = {
             KeySystem = "Sistem Kunci",
             EnterKey = "Masukkan Kunci",
             Submit = "Kirim",
-            CopyKey = "Salin Kunci",
-            Copied = "Disalin!",
             InvalidKey = "Kunci Tidak Valid",
             ValidKey = "Kunci Valid",
-            Search = "Cari...",
-            Toggle = "Toggle",
-            Slider = "Slider",
-            Dropdown = "Dropdown",
-            Button = "Tombol",
-            Input = "Input",
-            Keybind = "Keybind",
-            ColorPicker = "Pemilih Warna",
             PressKey = "Tekan tombol apa saja...",
         }
     }
@@ -104,13 +115,20 @@ end
 
 -- Utility Functions
 local function Tween(instance, properties, duration, style, direction)
+    if not TweenService then return end
+    
     duration = duration or 0.3
     style = style or Enum.EasingStyle.Quint
     direction = direction or Enum.EasingDirection.Out
     
-    local tween = TweenService:Create(instance, TweenInfo.new(duration, style, direction), properties)
-    tween:Play()
-    return tween
+    local success, tween = pcall(function()
+        return TweenService:Create(instance, TweenInfo.new(duration, style, direction), properties)
+    end)
+    
+    if success and tween then
+        tween:Play()
+        return tween
+    end
 end
 
 local function MakeDraggable(frame, dragHandle)
