@@ -689,8 +689,30 @@ function Library:CreateWindow(config)
         table.insert(self.Tabs, Tab)
 
         if #self.Tabs == 1 then
-            Tab.Button.MouseButton1Click:Fire()
+    -- set tab pertama sebagai aktif tanpa Fire()
+    for _, tab in pairs(self.Tabs) do
+        tab.Active = false
+        tab.Content.Visible = false
+        Utils:Tween(tab.Button, {BackgroundTransparency = 1}, 0.2)
+        local iconLbl = tab.Button:FindFirstChildOfClass("TextLabel")
+        if iconLbl then
+            iconLbl.TextColor3 = Theme:Get("TextDark")
         end
+        local nameLbl = tab.Button:FindFirstChild("TextLabel")
+        if nameLbl then
+            nameLbl.TextColor3 = Theme:Get("TextDark")
+        end
+    end
+
+    Tab.Active = true
+    Tab.Content.Visible = true
+    Utils:Tween(Tab.Button, {BackgroundTransparency = 0}, 0.2)
+    -- sesuaikan referensi icon/label milik Tab ini
+    icon.TextColor3 = Theme:Get("Accent")
+    label.TextColor3 = Theme:Get("Text")
+    Utils:RippleEffect(Tab.Button, Theme:Get("Accent"))
+end
+
 
         Tab.Content.ChildAdded:Connect(function()
             task.wait()
