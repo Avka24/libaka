@@ -8,21 +8,25 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Connections = {}
+local OpenDropdown = nil
+local OpenColorPicker = nil
 
 function UILib:CreateWindow(Config)
 	Config = Config or {}
 	local Title = Config.Title or "Premium Library"
 	local Subtitle = Config.Subtitle or ""
-	local Accent = Config.Accent or Color3.fromRGB(255, 85, 85) -- Tema hitam-merah default
+	local Accent = Config.Accent or Color3.fromRGB(255, 85, 85)
 
-	-- Cleanup UI lama & connections
+	-- Cleanup previous UI
 	if PlayerGui:FindFirstChild("PremiumUI") then
 		PlayerGui.PremiumUI:Destroy()
 	end
 	for _, conn in ipairs(Connections) do
-		conn:Disconnect()
+		if conn.Connected then conn:Disconnect() end
 	end
 	table.clear(Connections)
+	OpenDropdown = nil
+	OpenColorPicker = nil
 
 	local ScreenGui = Instance.new("ScreenGui")
 	ScreenGui.Name = "PremiumUI"
@@ -34,7 +38,7 @@ function UILib:CreateWindow(Config)
 	Main.Size = UDim2.new(0, 620, 0, 480)
 	Main.Position = UDim2.new(0.5, -310, 0.5, -240)
 	Main.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-	Main.ClipsDescendants = true
+	Main.ClipsDescendants = false
 	Main.Parent = ScreenGui
 
 	local MainCorner = Instance.new("UICorner")
@@ -124,9 +128,9 @@ function UILib:CreateWindow(Config)
 	PageContainer.BackgroundTransparency = 1
 	PageContainer.Parent = Content
 
-	-- Draggable (hanya saat tidak minimize)
+	-- Draggable
 	local Dragging = false
-	local DragInput, DragStart, StartPos
+	local DragStart, StartPos
 
 	local function UpdateDrag(input)
 		local delta = input.Position - DragStart
@@ -139,13 +143,6 @@ function UILib:CreateWindow(Config)
 			Dragging = true
 			DragStart = input.Position
 			StartPos = Main.Position
-
-			local conn = input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					Dragging = false
-				end
-			end)
-			table.insert(Connections, conn)
 		end
 	end)
 
@@ -155,7 +152,13 @@ function UILib:CreateWindow(Config)
 		end
 	end))
 
-	-- Minimize/Restore dengan animasi halus
+	table.insert(Connections, UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = false
+		end
+	end))
+
+	-- Minimize
 	local Minimized = false
 	MinimizeBtn.MouseButton1Click:Connect(function()
 		Minimized = not Minimized
@@ -170,12 +173,16 @@ function UILib:CreateWindow(Config)
 		for _, conn in ipairs(Connections) do
 			if conn.Connected then conn:Disconnect() end
 		end
+		if OpenDropdown then OpenDropdown:Destroy() end
+		if OpenColorPicker then OpenColorPicker:Destroy() end
 		ScreenGui:Destroy()
 	end)
 
 	local CurrentPage = nil
 
 	local Window = {}
+	Window.ScreenGui = ScreenGui
+	Window.Accent = Accent
 
 	function Window:CreateTab(Name)
 		local TabBtn = Instance.new("TextButton")
@@ -213,7 +220,6 @@ function UILib:CreateWindow(Config)
 		PagePadding.PaddingTop = UDim.new(0, 12)
 		PagePadding.Parent = Page
 
-		-- Tab selection
 		TabBtn.MouseButton1Click:Connect(function()
 			if CurrentPage then CurrentPage.Visible = false end
 			CurrentPage = Page
@@ -229,7 +235,6 @@ function UILib:CreateWindow(Config)
 			TabBtn.TextColor3 = Color3.new(1, 1, 1)
 		end)
 
-		-- Hover effect
 		TabBtn.MouseEnter:Connect(function()
 			if TabBtn.BackgroundColor3 ~= Accent then
 				TweenService:Create(TabBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
@@ -308,7 +313,7 @@ function UILib:CreateWindow(Config)
 				BtnCorner.Parent = Button
 
 				Button.MouseEnter:Connect(function()
-					TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(Accent.R * 255 + 30, Accent.G * 255 + 30, Accent.B * 255 + 30)}):Play()
+					TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(math.min(255, Accent.R*255 + 30), math.min(255, Accent.G*255 + 30), math.min(255, Accent.B*255 + 30))}):Play()
 				end)
 				Button.MouseLeave:Connect(function()
 					TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Accent}):Play()
@@ -320,8 +325,6 @@ function UILib:CreateWindow(Config)
 					TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 40)}):Play()
 				end)
 				Button.MouseButton1Click:Connect(cfg.Callback or function() end)
-
-				return Button
 			end
 
 			-- Toggle
@@ -502,7 +505,7 @@ function UILib:CreateWindow(Config)
 				return API
 			end
 
-			-- Dropdown
+			-- Dropdown (floating)
 			function SectionAPI:AddDropdown(cfg)
 				local Options = cfg.Options or {"Option 1"}
 				local Default = cfg.Default or Options[1]
@@ -515,12 +518,12 @@ function UILib:CreateWindow(Config)
 				local Label = Instance.new("TextLabel")
 				Label.Text = cfg.Name or "Dropdown"
 				Label.Size = UDim2.new(1, -160, 1, 0)
+				Label.Position = UDim2.new(0, 12, 0, 0)
 				Label.BackgroundTransparency = 1
 				Label.TextColor3 = Color3.new(1, 1, 1)
 				Label.Font = Enum.Font.Gotham
 				Label.TextSize = 15
 				Label.TextXAlignment = Enum.TextXAlignment.Left
-				Label.Position = UDim2.new(0, 12, 0, 0)
 				Label.Parent = Frame
 
 				local DropdownBtn = Instance.new("TextButton")
@@ -544,40 +547,40 @@ function UILib:CreateWindow(Config)
 				Arrow.Position = UDim2.new(1, -30, 0, 0)
 				Arrow.BackgroundTransparency = 1
 				Arrow.TextColor3 = Color3.fromRGB(180, 180, 180)
-				Arrow.Font = Enum.Font.GothamBold
 				Arrow.Parent = DropdownBtn
 
-				local ListFrame = Instance.new("Frame")
-				ListFrame.Size = UDim2.new(0, 150, 0, 0)
-				ListFrame.Position = UDim2.new(1, -162, 0, 40)
-				ListFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-				ListFrame.Visible = false
-				ListFrame.ClipsDescendants = true
-				ListFrame.Parent = Frame
-
-				local ListCorner = Instance.new("UICorner")
-				ListCorner.CornerRadius = UDim.new(0, 8)
-				ListCorner.Parent = ListFrame
-
-				local ListLayout = Instance.new("UIListLayout")
-				ListLayout.Parent = ListFrame
-
-				local Open = false
-
-				local function BuildList()
-					for _, child in ipairs(ListFrame:GetChildren()) do
-						if child:IsA("TextButton") then child:Destroy() end
+				local function CloseDropdown()
+					if OpenDropdown then
+						OpenDropdown:Destroy()
+						OpenDropdown = nil
 					end
+				end
+
+				DropdownBtn.MouseButton1Click:Connect(function()
+					CloseDropdown()
+
+					local Floating = Instance.new("Frame")
+					Floating.Size = UDim2.new(0, 150, 0, math.min(#Options * 34, 200))
+					Floating.Position = UDim2.fromOffset(DropdownBtn.AbsolutePosition.X, DropdownBtn.AbsolutePosition.Y + 38)
+					Floating.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+					Floating.ZIndex = 200
+					Floating.Parent = Window.ScreenGui
+
+					local FloatCorner = Instance.new("UICorner")
+					FloatCorner.CornerRadius = UDim.new(0, 8)
+					FloatCorner.Parent = Floating
+
+					local FloatList = Instance.new("UIListLayout")
+					FloatList.Parent = Floating
+
 					for _, opt in ipairs(Options) do
 						local OptBtn = Instance.new("TextButton")
 						OptBtn.Text = opt
 						OptBtn.Size = UDim2.new(1, 0, 0, 34)
 						OptBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 						OptBtn.TextColor3 = Color3.new(1, 1, 1)
-						OptBtn.Font = Enum.Font.Gotham
-						OptBtn.TextSize = 14
-						OptBtn.AutoButtonColor = false
-						OptBtn.Parent = ListFrame
+						OptBtn.ZIndex = 201
+						OptBtn.Parent = Floating
 
 						OptBtn.MouseEnter:Connect(function()
 							TweenService:Create(OptBtn, TweenInfo.new(0.2), {BackgroundColor3 = Accent}):Play()
@@ -587,24 +590,24 @@ function UILib:CreateWindow(Config)
 						end)
 						OptBtn.MouseButton1Click:Connect(function()
 							DropdownBtn.Text = opt
-							Open = false
-							TweenService:Create(ListFrame, TweenInfo.new(0.25), {Size = UDim2.new(0, 150, 0, 0)}):Play()
-							task.delay(0.25, function() ListFrame.Visible = false end)
+							CloseDropdown()
 							if cfg.Callback then cfg.Callback(opt) end
 						end)
 					end
-				end
-				BuildList()
 
-				DropdownBtn.MouseButton1Click:Connect(function()
-					Open = not Open
-					if Open then
-						ListFrame.Visible = true
-						TweenService:Create(ListFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 150, 0, #Options * 34)}):Play()
-					else
-						TweenService:Create(ListFrame, TweenInfo.new(0.25), {Size = UDim2.new(0, 150, 0, 0)}):Play()
-						task.delay(0.25, function() ListFrame.Visible = false end)
-					end
+					OpenDropdown = Floating
+
+					local closeConn
+					closeConn = UserInputService.InputBegan:Connect(function(input)
+						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+							local target = input.Target
+							if not Floating:IsAncestorOf(target) and target ~= DropdownBtn then
+								CloseDropdown()
+								closeConn:Disconnect()
+							end
+						end
+					end)
+					table.insert(Connections, closeConn)
 				end)
 
 				local API = {}
@@ -614,7 +617,6 @@ function UILib:CreateWindow(Config)
 				end
 				function API:Refresh(newOpts)
 					Options = newOpts
-					BuildList()
 				end
 				return API
 			end
@@ -736,12 +738,10 @@ function UILib:CreateWindow(Config)
 				return API
 			end
 
-			-- ColorPicker (RGB sliders - full functional, reliable, no asset dependency)
+			-- ColorPicker (full floating RGB)
 			function SectionAPI:AddColorPicker(cfg)
 				local Default = cfg.Default or Color3.new(1, 1, 1)
-				local R = math.floor(Default.R * 255)
-				local G = math.floor(Default.G * 255)
-				local B = math.floor(Default.B * 255)
+				local R, G, B = math.floor(Default.R * 255), math.floor(Default.G * 255), math.floor(Default.B * 255)
 
 				local Frame = Instance.new("Frame")
 				Frame.Size = UDim2.new(1, 0, 0, 40)
@@ -750,18 +750,18 @@ function UILib:CreateWindow(Config)
 
 				local Label = Instance.new("TextLabel")
 				Label.Text = cfg.Name or "Color Picker"
-				Label.Size = UDim2.new(1, -100, 1, 0)
+				Label.Size = UDim2.new(1, -80, 1, 0)
+				Label.Position = UDim2.new(0, 12, 0, 0)
 				Label.BackgroundTransparency = 1
 				Label.TextColor3 = Color3.new(1, 1, 1)
 				Label.Font = Enum.Font.Gotham
 				Label.TextSize = 15
 				Label.TextXAlignment = Enum.TextXAlignment.Left
-				Label.Position = UDim2.new(0, 12, 0, 0)
 				Label.Parent = Frame
 
 				local Preview = Instance.new("Frame")
-				Preview.Size = UDim2.new(0, 40, 0, 34)
-				Preview.Position = UDim2.new(1, -52, 0, 3)
+				Preview.Size = UDim2.new(0, 50, 0, 34)
+				Preview.Position = UDim2.new(1, -62, 0, 3)
 				Preview.BackgroundColor3 = Default
 				Preview.Parent = Frame
 
@@ -769,158 +769,151 @@ function UILib:CreateWindow(Config)
 				PreviewCorner.CornerRadius = UDim.new(0, 8)
 				PreviewCorner.Parent = Preview
 
-				local PickerFrame = Instance.new("Frame")
-				PickerFrame.Size = UDim2.new(1, 0, 0, 0)
-				PickerFrame.Position = UDim2.new(0, 0, 0, 46)
-				PickerFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-				PickerFrame.Visible = false
-				PickerFrame.Parent = Frame
-
-				local PickerCorner = Instance.new("UICorner")
-				PickerCorner.CornerRadius = UDim.new(0, 8)
-				PickerCorner.Parent = PickerFrame
-
-				local PickerPadding = Instance.new("UIPadding")
-				PickerPadding.PaddingAll = UDim.new(0, 12)
-				PickerPadding.Parent = PickerFrame
-
-				local PickerLayout = Instance.new("UIListLayout")
-				PickerLayout.Padding = UDim.new(0, 12)
-				PickerLayout.Parent = PickerFrame
-
-				local Open = false
-
-				local function CreateColorSlider(name, default)
-					local SliderFrame = Instance.new("Frame")
-					SliderFrame.Size = UDim2.new(1, 0, 0, 30)
-					SliderFrame.BackgroundTransparency = 1
-
-					local NameLabel = Instance.new("TextLabel")
-					NameLabel.Text = name
-					NameLabel.Size = UDim2.new(0, 40, 1, 0)
-					NameLabel.BackgroundTransparency = 1
-					NameLabel.TextColor3 = Color3.new(1, 1, 1)
-					NameLabel.Parent = SliderFrame
-
-					local SliderValue = Instance.new("TextLabel")
-					SliderValue.Text = tostring(default)
-					SliderValue.Size = UDim2.new(0, 50, 1, 0)
-					SliderValue.Position = UDim2.new(1, -50, 0, 0)
-					SliderValue.BackgroundTransparency = 1
-					SliderValue.TextColor3 = Accent
-					SliderValue.Parent = SliderFrame
-
-					local Track = Instance.new("Frame")
-					Track.Size = UDim2.new(1, -100, 0, 8)
-					Track.Position = UDim2.new(0, 50, 0.5, -4)
-					Track.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-					Track.Parent = SliderFrame
-
-					local TCorner = Instance.new("UICorner")
-					TCorner.CornerRadius = UDim.new(0, 4)
-					TCorner.Parent = Track
-
-					local TFill = Instance.new("Frame")
-					TFill.Size = UDim2.new(default / 255, 0, 1, 0)
-					TFill.BackgroundColor3 = Accent
-					TFill.Parent = Track
-
-					local FCorner = Instance.new("UICorner")
-					FCorner.CornerRadius = UDim.new(0, 4)
-					FCorner.Parent = TFill
-
-					local Knob = Instance.new("Frame")
-					Knob.Size = UDim2.new(0, 16, 0, 16)
-					Knob.Position = UDim2.new(default / 255, -8, 0.5, -8)
-					Knob.BackgroundColor3 = Color3.new(1, 1, 1)
-					Knob.Parent = Track
-
-					local KCorner = Instance.new("UICorner")
-					KCorner.CornerRadius = UDim.new(1, 0)
-					KCorner.Parent = Knob
-
-					return SliderFrame, SliderValue, TFill, Knob
+				local function ClosePicker()
+					if OpenColorPicker then
+						OpenColorPicker:Destroy()
+						OpenColorPicker = nil
+					end
 				end
-
-				local RFrame, RLabel, RFill, RKnob = CreateColorSlider("R", R)
-				local GFrame, GLabel, GFill, GKnob = CreateColorSlider("G", G)
-				local BFrame, BLabel, BFill, BKnob = CreateColorSlider("B", B)
-
-				RFrame.Parent = PickerFrame
-				GFrame.Parent = PickerFrame
-				BFrame.Parent = PickerFrame
-
-				local function UpdateColor()
-					local color = Color3.fromRGB(R, G, B)
-					Preview.BackgroundColor3 = color
-					if cfg.Callback then cfg.Callback(color) end
-				end
-
-				local function MakeSlider(valueLabel, fill, knob, component)
-					local dragging = false
-					local track = fill.Parent
-
-					track.InputBegan:Connect(function(input)
-						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-							dragging = true
-							local rel = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-							if component == "R" then R = math.floor(rel * 255) end
-							if component == "G" then G = math.floor(rel * 255) end
-							if component == "B" then B = math.floor(rel * 255) end
-							valueLabel.Text = tostring(component == "R" and R or component == "G" and G or B)
-							TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(rel, 0, 1, 0)}):Play()
-							TweenService:Create(knob, TweenInfo.new(0.1), {Position = UDim2.new(rel, -8, 0.5, -8)}):Play()
-							UpdateColor()
-						end
-					end)
-
-					table.insert(Connections, UserInputService.InputChanged:Connect(function(input)
-						if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-							local rel = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-							if component == "R" then R = math.floor(rel * 255) end
-							if component == "G" then G = math.floor(rel * 255) end
-							if component == "B" then B = math.floor(rel * 255) end
-							valueLabel.Text = tostring(component == "R" and R or component == "G" and G or B)
-							TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(rel, 0, 1, 0)}):Play()
-							TweenService:Create(knob, TweenInfo.new(0.1), {Position = UDim2.new(rel, -8, 0.5, -8)}):Play()
-							UpdateColor()
-						end
-					end))
-
-					table.insert(Connections, UserInputService.InputEnded:Connect(function(input)
-						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-							dragging = false
-						end
-					end))
-				end
-
-				MakeSlider(RLabel, RFill, RKnob, "R")
-				MakeSlider(GLabel, GFill, GKnob, "G")
-				MakeSlider(BLabel, BFill, BKnob, "B")
 
 				Preview.MouseButton1Click:Connect(function()
-					Open = not Open
-					PickerFrame.Visible = Open
-					if Open then
-						TweenService:Create(PickerFrame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 140)}):Play()
-					else
-						TweenService:Create(PickerFrame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+					ClosePicker()
+
+					local Floating = Instance.new("Frame")
+					Floating.Size = UDim2.new(0, 240, 0, 160)
+					Floating.Position = UDim2.fromOffset(Preview.AbsolutePosition.X - 190, Preview.AbsolutePosition.Y + 38)
+					Floating.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+					Floating.ZIndex = 200
+					Floating.Parent = Window.ScreenGui
+
+					local FloatCorner = Instance.new("UICorner")
+					FloatCorner.CornerRadius = UDim.new(0, 10)
+					FloatCorner.Parent = Floating
+
+					local Padding = Instance.new("UIPadding")
+					Padding.PaddingAll = UDim.new(0, 12)
+					Padding.Parent = Floating
+
+					local Layout = Instance.new("UIListLayout")
+					Layout.Padding = UDim.new(0, 12)
+					Layout.Parent = Floating
+
+					local function CreateSlider(name, val)
+						local SliderFrame = Instance.new("Frame")
+						SliderFrame.Size = UDim2.new(1, 0, 0, 30)
+						SliderFrame.BackgroundTransparency = 1
+						SliderFrame.Parent = Floating
+
+						local NameLabel = Instance.new("TextLabel")
+						NameLabel.Text = name
+						NameLabel.Size = UDim2.new(0, 30, 1, 0)
+						NameLabel.BackgroundTransparency = 1
+						NameLabel.TextColor3 = Color3.new(1, 1, 1)
+						NameLabel.Font = Enum.Font.Gotham
+						NameLabel.TextSize = 14
+						NameLabel.Parent = SliderFrame
+
+						local ValueLabel = Instance.new("TextLabel")
+						ValueLabel.Text = tostring(val)
+						ValueLabel.Size = UDim2.new(0, 50, 1, 0)
+						ValueLabel.Position = UDim2.new(1, -50, 0, 0)
+						ValueLabel.BackgroundTransparency = 1
+						ValueLabel.TextColor3 = Accent
+						ValueLabel.Font = Enum.Font.GothamBold
+						ValueLabel.TextSize = 14
+						ValueLabel.Parent = SliderFrame
+
+						local Track = Instance.new("Frame")
+						Track.Size = UDim2.new(1, -90, 0, 8)
+						Track.Position = UDim2.new(0, 40, 0.5, -4)
+						Track.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+						Track.Parent = SliderFrame
+
+						local TCorner = Instance.new("UICorner")
+						TCorner.CornerRadius = UDim.new(0, 4)
+						TCorner.Parent = Track
+
+						local Fill = Instance.new("Frame")
+						Fill.Size = UDim2.new(val / 255, 0, 1, 0)
+						Fill.BackgroundColor3 = Accent
+						Fill.Parent = Track
+
+						local FCorner = Instance.new("UICorner")
+						FCorner.CornerRadius = UDim.new(0, 4)
+						FCorner.Parent = Fill
+
+						local Knob = Instance.new("Frame")
+						Knob.Size = UDim2.new(0, 16, 0, 16)
+						Knob.Position = UDim2.new(val / 255, -8, 0.5, -8)
+						Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+						Knob.Parent = Track
+
+						local KCorner = Instance.new("UICorner")
+						KCorner.CornerRadius = UDim.new(1, 0)
+						KCorner.Parent = Knob
+
+						return SliderFrame, ValueLabel, Fill, Knob, Track
 					end
+
+					local RFrame, RLabel, RFill, RKnob, RTrack = CreateSlider("R", R)
+					local GFrame, GLabel, GFill, GKnob, GTrack = CreateSlider("G", G)
+					local BFrame, BLabel, BFill, BBKnob, BTrack = CreateSlider("B", B)
+
+					local function UpdateColor()
+						local color = Color3.fromRGB(R, G, B)
+						Preview.BackgroundColor3 = color
+						if cfg.Callback then cfg.Callback(color) end
+					end
+
+					local function MakeDrag(valueLabel, fill, knob, track, component)
+						local dragging = false
+						track.InputBegan:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+								dragging = true
+							end
+						end)
+						table.insert(Connections, UserInputService.InputChanged:Connect(function(input)
+							if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+								local rel = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+								local val = math.floor(rel * 255)
+								if component == "R" then R = val end
+								if component == "G" then G = val end
+								if component == "B" then B = val end
+								valueLabel.Text = tostring(val)
+								TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(rel, 0, 1, 0)}):Play()
+								TweenService:Create(knob, TweenInfo.new(0.1), {Position = UDim2.new(rel, -8, 0.5, -8)}):Play()
+								UpdateColor()
+							end
+						end))
+						table.insert(Connections, UserInputService.InputEnded:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+								dragging = false
+							end
+						end))
+					end
+
+					MakeDrag(RLabel, RFill, RKnob, RTrack, "R")
+					MakeDrag(GLabel, GFill, GKnob, GTrack, "G")
+					MakeDrag(BLabel, BFill, BBKnob, BTrack, "B")
+
+					OpenColorPicker = Floating
+
+					local closeConn
+					closeConn = UserInputService.InputBegan:Connect(function(input)
+						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+							if not Floating:IsAncestorOf(input.Target) and input.Target ~= Preview then
+								ClosePicker()
+								closeConn:Disconnect()
+							end
+						end
+					end)
+					table.insert(Connections, closeConn)
 				end)
 
 				local API = {}
 				function API:Set(color)
 					R, G, B = math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255)
 					Preview.BackgroundColor3 = color
-					RLabel.Text = tostring(R)
-					GLabel.Text = tostring(G)
-					BLabel.Text = tostring(B)
-					TweenService:Create(RFill, TweenInfo.new(0.2), {Size = UDim2.new(R/255, 0, 1, 0)}):Play()
-					TweenService:Create(GFill, TweenInfo.new(0.2), {Size = UDim2.new(G/255, 0, 1, 0)}):Play()
-					TweenService:Create(BFill, TweenInfo.new(0.2), {Size = UDim2.new(B/255, 0, 1, 0)}):Play()
-					TweenService:Create(RKnob, TweenInfo.new(0.2), {Position = UDim2.new(R/255, -8, 0.5, -8)}):Play()
-					TweenService:Create(GKnob, TweenInfo.new(0.2), {Position = UDim2.new(G/255, -8, 0.5, -8)}):Play()
-					TweenService:Create(BKnob, TweenInfo.new(0.2), {Position = UDim2.new(B/255, -8, 0.5, -8)}):Play()
 					if cfg.Callback then cfg.Callback(color) end
 				end
 				return API
@@ -969,8 +962,8 @@ function UILib:CreateWindow(Config)
 					DLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 					DLabel.Font = Enum.Font.GothamSemibold
 					DLabel.TextSize = 14
-					DLabel.Position = UDim2.new(0.5, 0, 0, -20)
-					DLabel.AnchorPoint = Vector2.new(0.5, 0)
+					DLabel.Position = UDim2.new(0.5, 0, 0, -10)
+					DLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 					DLabel.Parent = Divider
 				end
 			end
@@ -981,7 +974,7 @@ function UILib:CreateWindow(Config)
 		return Tab
 	end
 
-	-- Notification (stacked)
+	-- Notification
 	function Window:Notify(cfg)
 		local Title = cfg.Title or "Notification"
 		local Text = cfg.Text or "Message"
@@ -989,13 +982,13 @@ function UILib:CreateWindow(Config)
 
 		local notifCount = 0
 		for _, child in ipairs(ScreenGui:GetChildren()) do
-			if child:IsA("Frame") and child.Name == "Notification" then
+			if child:IsA("Frame") and child.Name == "Notif" then
 				notifCount = notifCount + 1
 			end
 		end
 
 		local Notif = Instance.new("Frame")
-		Notif.Name = "Notification"
+		Notif.Name = "Notif"
 		Notif.Size = UDim2.new(0, 320, 0, 100)
 		Notif.Position = UDim2.new(1, 330, 1, -120 - (notifCount * 110))
 		Notif.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
